@@ -22,35 +22,27 @@
                         <div class="column" id="logo">
                             <img src="../../UN intercambio logo.png" alt="Logo Un Intercambio" id="logoIntercambio">
                         </div>
+                        <span style="font-size:1.2em;font-weight:600;margin-left:10px;">Universidad Intercambio</span>
                     </div>
                 </li>
                 <li><a href="Convenios.html">Convenios</a></li>
                 <li><a href="Analytics.html">Analytics</a></li>
-
-                <br>
-                <br>
-                <script>
-                    function logout() {
-                        // Redirige al usuario a la página de inicio de sesión
-                        window.location.href = '../login.html'; // Ajusta la ruta si es necesario
-                    }
-                </script>
-                <li>
-                    <a class="button-container">
-                        <button id="cerrar-sesion" onclick="logout()">Cerrar sesion</button>
-                        <!--BOTON PARA CERRAR SESION-->
-                    </a>
-                </li>
+                <li style="margin-left:auto;"><a class="button-container"><button id="cerrar-sesion" onclick="logout()">Cerrar sesión</button></a></li>
             </ul>
         </nav>
     </header>
     <div class="search-container">
         <span class="search-icon"><i class="fas fa-search"></i></span>
-        <!-- Icono de búsqueda de Font Awesome -->
-        <input type="text" id="search-bar" class="search-bar" placeholder="Buscar...">
+        <input type="text" id="search-bar" class="search-bar" placeholder="Buscar universidades...">
+        <div class="filter-dropdown-toggle" id="filter-dropdown-toggle">
+            <i class="fas fa-filter"></i>
+        </div>
+        <div class="filters-dropdown" id="filters-dropdown">
+            <div class="filters" id="filters"></div>
+        </div>
     </div>
-    <div class="filters" id="filters"></div>
     <div class="container" id="card-container"></div>
+    <div id="pagination"></div>
 
     <!-- Pop-up y overlay -->
     <div class="popup-overlay" id="popup-overlay"></div>
@@ -60,172 +52,322 @@
     </div>
 
     <script>
+        function logout() {
+            window.location.href = '../login.html';
+        }
+
+        // Estado global de filtros para la API
+        const filters = {
+            q: "",
+            country: "",
+            language: "",
+            state: "",
+            agreement_type: "",
+            subscription_level: "",
+            limit: 20,
+            skip: 0
+        };
+
         async function fetchJSON() {
-            const response = await fetch('http://localhost:5000/api/convenios');
+            // Construye la query string según los filtros activos
+            const params = new URLSearchParams();
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value && value !== 0) params.append(key, value);
+            });
+            const response = await fetch(`http://127.0.0.1:8000/convocatorias/?${params.toString()}`);
             const data = await response.json();
             return data;
         }
 
+        function createFilterDropdown(id, label, options) {
+            const container = document.createElement('div');
+            container.className = 'filter-dropdown';
+            const select = document.createElement('select');
+            select.id = id;
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = label;
+            select.appendChild(defaultOption);
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                select.appendChild(option);
+            });
+            select.addEventListener('change', async () => {
+                filters[id] = select.value;
+                filters.skip = 0; // Reinicia paginación
+                await refreshCards();
+            });
+            container.appendChild(select);
+            return container;
+        }
+
+        function setupFilterDropdown() {
+            const filtersDiv = document.getElementById('filters');
+            filtersDiv.innerHTML = '';
+            filtersDiv.appendChild(createFilterDropdown('country', 'País', countries));
+            filtersDiv.appendChild(createFilterDropdown('language', 'Idioma', languages));
+            filtersDiv.appendChild(createFilterDropdown('state', 'Estado', states));
+            filtersDiv.appendChild(createFilterDropdown('agreement_type', 'Tipo', agreementTypes));
+            filtersDiv.appendChild(createFilterDropdown('subscription_level', 'Nivel', subscriptionLevels));
+        }
+
+        document.getElementById('filter-dropdown-toggle').addEventListener('click', function() {
+            const dropdown = document.getElementById('filters-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', function(e) {
+            const toggle = document.getElementById('filter-dropdown-toggle');
+            const dropdown = document.getElementById('filters-dropdown');
+            if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
         function createCards(data) {
             const container = document.getElementById('card-container');
-            container.innerHTML = ''; // Limpiar contenedor antes de agregar nuevas tarjetas
+            container.innerHTML = '';
             data.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'card';
 
-                // Crear el atributo Props combinando datos relevantes
-                const Props = `
-                    ${item.country}
-                    ${item.institution}
-                    ${item.agreementType}
-                    ${item.validity}
-                    ${item.state}
-                    ${item.languages}
-                    ${item.Props}
-                    ${item.subscriptionYear}
-                `.toLowerCase(); // Convertir todo a minúsculas para facilitar la búsqueda
-
-                card.setAttribute('Props', Props);
-
-                const content = document.createElement('div');
-                content.className = 'card-content';
-
+                // Header con gradiente
+                const header = document.createElement('div');
+                header.className = 'card-header';
                 const title = document.createElement('h2');
                 title.className = 'card-title';
                 title.innerHTML = `<img src="../assets/flags/${item.country}.png" alt="${item.country} flag" class="flag">${item.institution}`;
-                content.appendChild(title);
+                header.appendChild(title);
+                if (item.subscriptionLevel) {
+                    const subtitle = document.createElement('div');
+                    subtitle.className = 'card-subtitle';
+                    subtitle.textContent = item.subscriptionLevel;
+                    header.appendChild(subtitle);
+                }
+                card.appendChild(header);
 
-                const description = document.createElement('p');
+                // Contenido blanco
+                const content = document.createElement('div');
+                content.className = 'card-content';
+
+                // Estado y validez
+                const statusRow = document.createElement('div');
+                if (item.state) {
+                    const status = document.createElement('span');
+                    let stateClass = '';
+                    if (item.state.toLowerCase() === 'vigente') {
+                        stateClass = 'vigente';
+                    } else if (item.state.toLowerCase() === 'no vigente') {
+                        stateClass = 'no-vigente';
+                    } else {
+                        stateClass = item.state.toLowerCase().replace(/\s+/g, '-');
+                    }
+                    status.className = 'card-status ' + stateClass;
+                    status.textContent = item.state.toUpperCase();
+                    statusRow.appendChild(status);
+                }
+                if (item.validity) {
+                    const validity = document.createElement('span');
+                    let validityClass = 'card-validity';
+                    let validityIcon = '';
+                    // Extraer mes y año de item.validity (ejemplo: 'August - 2026')
+                    const validityMatch = item.validity.match(/([A-Za-záéíóúñ]+)\s*-\s*(\d{4})/);
+                    let isFuture = false;
+                    if (validityMatch) {
+                        const months = {
+                            'january': 0, 'february': 1, 'march': 2, 'april': 3, 'may': 4, 'june': 5, 'july': 6, 'august': 7, 'september': 8, 'october': 9, 'november': 10, 'december': 11,
+                            'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3, 'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7, 'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+                        };
+                        const monthStr = validityMatch[1].toLowerCase();
+                        const year = parseInt(validityMatch[2], 10);
+                        const month = months[monthStr];
+                        if (month !== undefined) {
+                            const now = new Date();
+                            const validityDate = new Date(year, month + 1, 0); // último día del mes
+                            isFuture = validityDate >= new Date(now.getFullYear(), now.getMonth(), 1);
+                        }
+                    }
+                    if (isFuture) {
+                        validityClass += ' vigente';
+                        validityIcon = '<i class="fas fa-calendar-check"></i>';
+                    } else {
+                        validityIcon = '<i class="fas fa-calendar-times" style="color:#ef4444;"></i>';
+                    }
+                    validity.className = validityClass;
+                    validity.innerHTML = `${validityIcon} ${item.validity}`;
+                    statusRow.appendChild(validity);
+                }
+                content.appendChild(statusRow);
+
+                // Descripción en dos columnas
+                const description = document.createElement('div');
                 description.className = 'card-description';
                 description.innerHTML = `
-                <strong>Country:</strong> ${item.country}<br>
-                <strong>Agreement Type:</strong> ${item.agreementType}<br>
-                <strong>Validity:</strong> ${item.validity}<br>
-                <strong>State:</strong> ${item.state}<br>
-                <strong>Languages:</strong> ${item.languages}<br>
-                <strong>Subscription Year:</strong> ${item.subscriptionYear}
-            `;
+                    <div><strong>PAÍS</strong> <img src="../assets/flags/${item.country}.png" alt="${item.country} flag" class="flag">${item.country}</div>
+                    <div><strong>TIPO DE ACUERDO</strong> ${item.agreementType}</div>
+                    <div><strong>IDIOMAS</strong> ${item.languages}</div>
+                    <div><strong>AÑO SUSCRIPCIÓN</strong> ${item.subscriptionYear}</div>
+                `;
                 content.appendChild(description);
 
+                // Links
                 const links = document.createElement('div');
                 links.className = 'card-links';
-
                 if (item.dreLink) {
                     const dreLink = document.createElement('a');
                     dreLink.href = item.dreLink;
                     dreLink.textContent = 'DRE Link';
                     dreLink.target = '_blank';
                     links.appendChild(dreLink);
-                    links.appendChild(document.createElement('br'));
                 }
-
                 if (item.agreementLink) {
                     const agreementLink = document.createElement('a');
                     agreementLink.href = item.agreementLink;
                     agreementLink.textContent = 'Agreement Link';
                     agreementLink.target = '_blank';
                     links.appendChild(agreementLink);
-                    links.appendChild(document.createElement('br'));
                 }
-
                 if (item.internationalLink) {
                     const internationalLink = document.createElement('a');
                     internationalLink.href = item.internationalLink;
                     internationalLink.textContent = 'International Link';
                     internationalLink.target = '_blank';
                     links.appendChild(internationalLink);
-                    links.appendChild(document.createElement('br'));
                 }
-
                 content.appendChild(links);
+
+                // Acciones (editar/eliminar)
+                const actions = document.createElement('div');
+                actions.className = 'card-actions';
+                const editBtn = document.createElement('button');
+                editBtn.textContent = 'Editar';
+                editBtn.onclick = () => showEditPopup(item);
+                actions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.onclick = async () => {
+                    if (confirm('¿Seguro que deseas eliminar este convenio?')) {
+                        await fetch(`http://127.0.0.1:8000/convocatorias/${item.id || item._id || item._id?.$oid}`, { method: 'DELETE' });
+                        await refreshCards();
+                    }
+                };
+                actions.appendChild(deleteBtn);
+                content.appendChild(actions);
+
                 card.appendChild(content);
                 container.appendChild(card);
-
-                // Agregar event listener para mostrar el pop-up
-                card.addEventListener('click', () => showPopup(Props));
             });
         }
 
-        function normalizeString(str) {
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        }
-
-        function applyFilters(filters) {
-            const cards = document.querySelectorAll('.card');
-            cards.forEach(card => {
-                const Props = normalizeString(card.getAttribute('Props'));
-                const isVisible = filters.every(filter => Props.includes(normalizeString(filter)));
-                card.style.display = isVisible ? 'block' : 'none';
-            });
-        }
-
-
-        function removeFilter(filter, filters) {
-            const index = filters.indexOf(filter);
-            if (index !== -1) {
-                filters.splice(index, 1);
-                applyFilters(filters);
-            }
-        }
-
-        function addFilter(filter, filters) {
-            const normalizedFilter = normalizeString(filter);
-            if (!filters.includes(normalizedFilter)) {
-                filters.push(normalizedFilter);
-                const filterElement = document.createElement('div');
-                filterElement.className = 'filter';
-                filterElement.textContent = filter; // Mantiene la versión original para mostrar
-
-                const removeButton = document.createElement('span');
-                removeButton.className = 'remove-filter';
-                removeButton.innerHTML = '&times;';
-                removeButton.onclick = () => {
-                    removeFilter(normalizedFilter, filters);
-                    filterElement.remove();
-                };
-
-                filterElement.appendChild(removeButton);
-                document.getElementById('filters').appendChild(filterElement);
-                applyFilters(filters);
-            }
-        }
-
-
-        function showPopup(content) {
+        function showEditPopup(item) {
             const popup = document.getElementById('popup');
             const popupContent = document.getElementById('popup-content');
             const overlay = document.getElementById('popup-overlay');
-
-            popupContent.textContent = content;
+            popupContent.innerHTML = `
+            <h3>Editar Convenio</h3>
+            <form id="edit-form">
+                <label>Institución: <input name="institution" value="${item.institution || ''}"></label><br>
+                <label>País: <input name="country" value="${item.country || ''}"></label><br>
+                <label>Tipo: <input name="agreementType" value="${item.agreementType || ''}"></label><br>
+                <label>Vigencia: <input name="validity" value="${item.validity || ''}"></label><br>
+                <label>Estado: <input name="state" value="${item.state || ''}"></label><br>
+                <label>Idiomas: <input name="languages" value="${item.languages || ''}"></label><br>
+                <label>Año suscripción: <input name="subscriptionYear" value="${item.subscriptionYear || ''}"></label><br>
+                <button type="submit">Guardar</button>
+            </form>
+        `;
             popup.style.display = 'block';
             overlay.style.display = 'block';
+            overlay.onclick = hidePopup;
 
-            overlay.addEventListener('click', hidePopup);
+            document.getElementById('edit-form').onsubmit = async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const updateData = {};
+                formData.forEach((value, key) => {
+                    if (value) updateData[key] = value;
+                });
+                await fetch(`http://127.0.0.1:8000/convocatorias/${item.id || item._id || item._id?.$oid}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                hidePopup();
+                await refreshCards();
+            };
         }
 
         function hidePopup() {
-            const popup = document.getElementById('popup');
-            const overlay = document.getElementById('popup-overlay');
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('popup-overlay').style.display = 'none';
+        }
 
-            popup.style.display = 'none';
-            overlay.style.display = 'none';
+        async function refreshCards() {
+            const data = await fetchJSON();
+            createCards(data);
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const pagDiv = document.getElementById('pagination');
+            pagDiv.innerHTML = '';
+            const totalPages = 5; // Puedes calcularlo dinámicamente si tienes el total
+            const currentPage = Math.floor(filters.skip / filters.limit) + 1;
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '«';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = async () => {
+                if (filters.skip >= filters.limit) {
+                    filters.skip -= filters.limit;
+                    await refreshCards();
+                }
+            };
+            pagDiv.appendChild(prevBtn);
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                if (i === currentPage) pageBtn.classList.add('active');
+                pageBtn.onclick = async () => {
+                    filters.skip = (i - 1) * filters.limit;
+                    await refreshCards();
+                };
+                pagDiv.appendChild(pageBtn);
+            }
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = '»';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = async () => {
+                filters.skip += filters.limit;
+                await refreshCards();
+            };
+            pagDiv.appendChild(nextBtn);
         }
 
         async function main() {
-            const jsonData = await fetchJSON();
-            createCards(jsonData);
+            // Opciones de ejemplo, puedes obtenerlas dinámicamente si lo prefieres
+            countries = ["Colombia", "México", "Argentina", "España", "Estados Unidos"];
+            languages = ["Español", "Inglés", "Francés"];
+            states = ["Vigente", "No Vigente"];
+            agreementTypes = ["Marco", "Específico"];
+            subscriptionLevels = ["Facultad de Ciencias Humanas", "Facultad de Ingeniería"];
+            setupFilterDropdown();
 
-            const filters = [];
+            // Búsqueda por texto
             const searchBar = document.getElementById('search-bar');
-            searchBar.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && searchBar.value) {
-                    addFilter(searchBar.value, filters);
-                    searchBar.value = '';
+            searchBar.addEventListener('keypress', async (e) => {
+                if (e.key === 'Enter') {
+                    filters.q = searchBar.value;
+                    filters.skip = 0;
+                    await refreshCards();
                 }
             });
 
-            // Event listener para cerrar el pop-up
+
+            // Cerrar popup
             document.getElementById('close-popup').addEventListener('click', hidePopup);
+
+            await refreshCards();
         }
 
         main();
