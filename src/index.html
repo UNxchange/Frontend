@@ -1,60 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - UN Intercambio</title>
-    <link rel="stylesheet" href="atoms/navbar.css" />
-    <link rel="stylesheet" href="HeatMap.css" />
-    <link rel="stylesheet" href="atoms/analytics.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Universidad Nacional de Colombia</title>
+    <link rel="stylesheet" href="./atoms/login-atoms.css">
+    <link rel="stylesheet" href="./molecules/login-form.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 280px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-text {
+            font-size: 28px;
+            font-weight: 500;
+            color: #3498db;
+            margin-bottom: 30px;
+        }
+    </style>
 </head>
-
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li id="brand-container">
-                    <div class="brand-container">
-                        <div class="column" id="logo">
-                            <img src="assets/UN intercambio logo.png" alt="Logo Un Intercambio" id="logoIntercambio" />
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <div class="login-container" style="max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
-            <h2>Login</h2>
-            <form id="loginForm">
-                <div style="margin-bottom: 15px;">
-                    <label for="username">Username</label><br />
-                    <input type="text" id="username" name="username" required style="width: 100%; padding: 8px;" />
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="password">Password</label><br />
-                    <input type="password" id="password" name="password" required style="width: 100%; padding: 8px;" />
-                </div>
-                <button type="submit" style="width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px;">Login</button>
-            </form>
-        </div>
-    </main>
-
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            // For demonstration, just alert the username and password
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            alert(`Username: ${username}\nPassword: ${password}`);
-            // Here you can add actual login logic, e.g., API call to backend
-
-            // Redirect to convenios page after login
-            window.location.href = 'pages/Convenios.html';
-        });
-    </script>
+    <!-- Organismo: login -->
+    <!-- Incluimos el organismo, que a su vez incluye moléculas y átomos -->
+    <!--#include file="./organisms/login-organism.html" -->
+    <div class="login-container">
+        <img src="https://edu.ieee.org/co-unemb/wp-content/uploads/sites/195/escudoUnal_black.png" alt="Universidad Nacional de Colombia" class="logo">
+        
+        <h1 class="welcome-text">Bienvenido</h1>
+        
+        <!-- Molécula: formulario de login -->
+        <form id="loginForm">
+            <input type="text" class="input-field" placeholder="Username" required>
+            <input type="password" class="input-field" placeholder="Password" required>
+            
+            <a href="#" class="forgot-password">Forgot Password?</a>
+            
+            <button type="submit" class="login-button">Log In</button>
+        </form>
+        
+        <a href="./pages/singup.html" class="signup-link">Aún no tienes cuenta ? Registrate aquí</a>
+    </div>
+    <script src="./scripts/login-form.js"></script>
 </body>
-
 </html>

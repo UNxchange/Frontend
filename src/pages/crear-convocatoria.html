@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Convocatoria - Dashboard Profesional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .search-filter-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-button {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .filter-icon {
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            width: 250px;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #1a56db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1e429f;
+        }
+
+        .btn-secondary {
+            background-color: #4a5568;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #2d3748;
+        }
+
+        .datatable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .datatable th {
+            background-color: #f8f9fa;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+            position: relative;
+        }
+
+        .datatable th.sortable {
+            cursor: pointer;
+        }
+
+        .datatable th.sortable::after {
+            content: "↕";
+            position: absolute;
+            right: 8px;
+            color: #adb5bd;
+        }
+
+        .datatable td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .datatable tbody tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .datatable tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+
+        .number-cell {
+            width: 60px;
+        }
+
+        .university-cell {
+            min-width: 180px;
+        }
+
+        .description-cell {
+            min-width: 300px;
+        }
+
+        .status-cell {
+            width: 100px;
+        }
+
+        .country-cell {
+            width: 150px;
+        }
+
+        .language-cell {
+            width: 100px;
+        }
+
+        .validity-cell {
+            width: 100px;
+            text-align: center;
+        }
+
+        .action-cell {
+            width: 60px;
+            text-align: center;
+        }
+
+        .university-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .university-code {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .description-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-open {
+            background-color: #e6f0fd;
+            color: #1a56db;
+        }
+
+        .status-paid {
+            background-color: #def7ec;
+            color: #03543e;
+        }
+
+        .status-inactive {
+            background-color: #edf2f7;
+            color: #4a5568;
+        }
+
+        .status-due {
+            background-color: #fde8e8;
+            color: #c81e1e;
+        }
+
+        .country-flag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flag {
+            width: 24px;
+            height: 16px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        .flag-romania { background: linear-gradient(to right, #002b7f 33%, #fcd116 33%, #fcd116 66%, #ce1126 66%); }
+        .flag-singapore { background: linear-gradient(to bottom, #ed2939 50%, white 50%); }
+        .flag-serbia { background: linear-gradient(to bottom, #c6363c 33%, #0c4076 33%, #0c4076 66%, white 66%); }
+        .flag-chile { background: linear-gradient(to bottom, white 50%, #d52b1e 50%); }
+        .flag-philippines { background: linear-gradient(to bottom, #0038a8 50%, #ce1126 50%); }
+        .flag-venezuela { background: linear-gradient(to bottom, #ffcc00 33%, #0033a0 33%, #0033a0 66%, #cf142b 66%); }
+        .flag-malaysia { background: linear-gradient(to bottom, #cc0001 50%, white 50%); }
+        .flag-netherlands { background: linear-gradient(to bottom, #ae1c28 33%, white 33%, white 66%, #21468b 66%); }
+        .flag-israel { background: linear-gradient(to bottom, white 20%, #0038b8 20%, #0038b8 30%, white 30%, white 70%, #0038b8 70%, #0038b8 80%, white 80%); }
+        .flag-argentina { background: linear-gradient(to bottom, #74acdf 33%, white 33%, white 66%, #74acdf 66%); }
+
+        .validity-icon {
+            font-size: 16px;
+        }
+
+        .icon-valid {
+            color: #059669;
+        }
+
+        .icon-invalid {
+            color: #dc2626;
+        }
+
+        .action-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #1a56db;
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin: 0 auto;
+        }
+
+        .action-button:hover {
+            background-color: #1e429f;
+        }
+
+        .edit-button {
+            font-size: 14px;
+        }
+
+        .delete-button {
+            font-size: 14px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .rows-per-page {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .rows-select {
+            padding: 4px 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .page-navigation {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .page-button {
+            width: 32px;
+            height: 32px;
+            border: 1px solid #ced4da;
+            background: white;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        /* Estilos para el toggle switch */
+        .role-toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            border-top: 1px solid #dee2e6;
+            background-color: #f8f9fa;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            margin: 0 10px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #1a56db;
+        }
+
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px #1a56db;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        /* Estilos para el modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            width: 800px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-title-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .modal-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #1a56db;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .modal-subtitle {
+            margin-top: 4px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #4b5563;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-label-required::after {
+            content: " *";
+            color: #ef4444;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #111827;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1a56db;
+            box-shadow: 0 0 0 2px rgba(26, 86, 219, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #111827;
+            background-color: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b7280' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #1a56db;
+            box-shadow: 0 0 0 2px rgba(26, 86, 219, 0.1);
+        }
+
+        .form-date {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #111827;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .form-date-icon {
+            color: #6b7280;
+        }
+
+        .form-date-text {
+            flex: 1;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .toggle-info {
+            flex: 1;
+        }
+
+        .toggle-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 2px;
+        }
+
+        .toggle-description {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e5e7eb;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #1a56db;
+        }
+
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 1px #1a56db;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            padding: 10px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background-color: white;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f9fafb;
+        }
+
+        .btn-create {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #1a56db;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-create:hover {
+            background-color: #1e429f;
+        }
+
+        .btn-create-icon {
+            width: 16px;
+            height: 16px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header con búsqueda y botones -->
+        <div class="dashboard-header">
+            <div class="search-filter-container">
+                <button class="filter-button">
+                    <span class="filter-icon">⚙️</span>
+                </button>
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Search...">
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary">
+                    <span style="margin-right: 4px;">+</span> Crear convocatoria
+                </button>
+                <button class="btn btn-secondary">Cerrar sesión</button>
+            </div>
+        </div>
+
+        <!-- Tabla -->
+        <table class="datatable">
+            <thead>
+                <tr>
+                    <th class="checkbox-cell"><input type="checkbox"></th>
+                    <th class="number-cell sortable">#</th>
+                    <th class="university-cell sortable">UNIVERSIDAD</th>
+                    <th class="description-cell">DESCRIPTION</th>
+                    <th class="status-cell sortable">ESTADO</th>
+                    <th class="country-cell sortable">PAÍS</th>
+                    <th class="language-cell">IDIOMA</th>
+                    <th class="validity-cell">VIGENCIA</th>
+                    <th class="action-cell">EDITAR</th>
+                    <th class="action-cell">ELIMINAR</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Fila 1 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">1</td>
+                    <td class="university-cell">
+                        <div class="university-name">Ann Culhane</div>
+                        <div class="university-code">5684236526</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-open">Open</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-romania"></span>
+                            <span>Romania</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-invalid">❌</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 2 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">2</td>
+                    <td class="university-cell">
+                        <div class="university-name">Ahmad Rosser</div>
+                        <div class="university-code">5684236527</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-paid">Paid</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-singapore"></span>
+                            <span>Singapore</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-valid">✅</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 3 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">3</td>
+                    <td class="university-cell">
+                        <div class="university-name">Zain Calzoni</div>
+                        <div class="university-code">5684236528</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-open">Open</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-serbia"></span>
+                            <span>Serbia</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-invalid">❌</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 4 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">4</td>
+                    <td class="university-cell">
+                        <div class="university-name">Leo Stanton</div>
+                        <div class="university-code">5684236529</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-inactive">Inactive</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-chile"></span>
+                            <span>Chile</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-invalid">❌</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 5 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">5</td>
+                    <td class="university-cell">
+                        <div class="university-name">Kaiya Vetrovs</div>
+                        <div class="university-code">5684236530</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-open">Open</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-philippines"></span>
+                            <span>Philippines</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-valid">✅</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 6 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">6</td>
+                    <td class="university-cell">
+                        <div class="university-name">Ryan Westervelt</div>
+                        <div class="university-code">5684236531</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-paid">Paid</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-venezuela"></span>
+                            <span>Venezuela</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-invalid">❌</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 7 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">7</td>
+                    <td class="university-cell">
+                        <div class="university-name">Corey Stanton</div>
+                        <div class="university-code">5684236532</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-due">Due</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-malaysia"></span>
+                            <span>Malaysia</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-invalid">❌</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 8 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">8</td>
+                    <td class="university-cell">
+                        <div class="university-name">Adison Aminoff</div>
+                        <div class="university-code">5684236533</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-open">Open</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-netherlands"></span>
+                            <span>Netherlands</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-valid">✅</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 9 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">9</td>
+                    <td class="university-cell">
+                        <div class="university-name">Alfredo Aminoff</div>
+                        <div class="university-code">5684236534</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-inactive">Inactive</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-israel"></span>
+                            <span>Israel</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-valid">✅</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+
+                <!-- Fila 10 -->
+                <tr>
+                    <td class="checkbox-cell"><input type="checkbox"></td>
+                    <td class="number-cell">10</td>
+                    <td class="university-cell">
+                        <div class="university-name">Allison Botosh</div>
+                        <div class="university-code">5684236535</div>
+                    </td>
+                    <td class="description-cell">
+                        <div class="description-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Sed euismod, nisl vel ultricies lacinia.</div>
+                    </td>
+                    <td class="status-cell">
+                        <span class="status-badge status-open">Open</span>
+                    </td>
+                    <td class="country-cell">
+                        <div class="country-flag">
+                            <span class="flag flag-argentina"></span>
+                            <span>Argentina</span>
+                        </div>
+                    </td>
+                    <td class="language-cell"></td>
+                    <td class="validity-cell">
+                        <span class="validity-icon icon-valid">✅</span>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button edit-button">✏️</button>
+                    </td>
+                    <td class="action-cell">
+                        <button class="action-button delete-button">🗑️</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="pagination">
+            <div class="pagination-info">1-10 of 97</div>
+            <div class="pagination-controls">
+                <div class="rows-per-page">
+                    <span>Rows per page:</span>
+                    <select class="rows-select">
+                        <option>10</option>
+                        <option>25</option>
+                        <option>50</option>
+                        <option>100</option>
+                    </select>
+                </div>
+                <div class="page-navigation">
+                    <button class="page-button" disabled>&lt;</button>
+                    <div class="page-info">1/10</div>
+                    <button class="page-button">&gt;</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toggle Switch para cambiar de rol -->
+        <div class="role-toggle-container">
+            <span class="toggle-label">Cambiar a rol estudiante</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="roleToggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-label">Vista Profesional</span>
+        </div>
+    </div>
+
+    <!-- Modal para crear convocatoria -->
+    <div class="modal-overlay">
+        <div class="modal">
+            <!-- Encabezado del modal -->
+            <div class="modal-header">
+                <div class="modal-title-container">
+                    <div class="modal-icon">📄</div>
+                    <div>
+                        <h2 class="modal-title">Crear Nueva Convocatoria</h2>
+                        <p class="modal-subtitle">Crear una anuncio de una nueva convocatoria</p>
+                    </div>
+                </div>
+                <button class="modal-close">&times;</button>
+            </div>
+
+            <!-- Cuerpo del modal -->
+            <div class="modal-body">
+                <!-- Sección: Información Básica -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">📋</div>
+                        <h3 class="section-title">Información Básica</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label form-label-required" for="nombre-convocatoria">Nombre de Convocatoria</label>
+                        <input type="text" id="nombre-convocatoria" class="form-control" placeholder="Introduzca el nombre de la convocatoria">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label form-label-required" for="descripcion">Descripción</label>
+                        <textarea id="descripcion" class="form-control" placeholder="Introduzca una descripción detallada de la convocatoria"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="fecha-inicio">Fecha de Inicio</label>
+                            <div class="form-date">
+                                <span class="form-date-icon">📅</span>
+                                <span class="form-date-text">Selecciona Fecha</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="fecha-finalizacion">Fecha de Finalización</label>
+                            <div class="form-date">
+                                <span class="form-date-icon">📅</span>
+                                <span class="form-date-text">Selecciona Fecha</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Localización e Institución -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">🏢</div>
+                        <h3 class="section-title">Localización E Institución</h3>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="institucion">Institución</label>
+                            <input type="text" id="institucion" class="form-control" placeholder="Introduzca el nombre de la institución">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="tipo-acuerdo">Tipo de Acuerdo</label>
+                            <select id="tipo-acuerdo" class="form-select">
+                                <option value="" selected disabled>Seleccione el tipo</option>
+                                <option value="bilateral">Bilateral</option>
+                                <option value="multilateral">Multilateral</option>
+                                <option value="especifico">Específico</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="localizacion">Localización/Ciudad</label>
+                            <input type="text" id="localizacion" class="form-control" placeholder="Introduzca la localización">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="pais">País</label>
+                            <select id="pais" class="form-select">
+                                <option value="" selected disabled>Seleccione el país</option>
+                                <option value="argentina">Argentina</option>
+                                <option value="chile">Chile</option>
+                                <option value="colombia">Colombia</option>
+                                <option value="españa">España</option>
+                                <option value="mexico">México</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección: Requisitos y Participantes -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">👥</div>
+                        <h3 class="section-title">Requisitos Y Participantes</h3>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="participantes-maximos">Participantes Máximos</label>
+                            <input type="number" id="participantes-maximos" class="form-control" placeholder="Introduzca el número máximo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="requisitos-lenguaje">Requisitos de Lenguaje</label>
+                            <select id="requisitos-lenguaje" class="form-select">
+                                <option value="" selected disabled>Seleccione el lenguaje</option>
+                                <option value="ingles">Inglés</option>
+                                <option value="frances">Francés</option>
+                                <option value="aleman">Alemán</option>
+                                <option value="italiano">Italiano</option>
+                                <option value="portugues">Portugués</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="requisitos-elegibilidad">Requisitos de Elegibilidad</label>
+                        <textarea id="requisitos-elegibilidad" class="form-control" placeholder="Introduzca los requisitos de elegibilidad y las calificaciones requeridas."></textarea>
+                    </div>
+                </div>
+
+                <!-- Sección: Información Adicional -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-icon">ℹ️</div>
+                        <h3 class="section-title">Información Adicional</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="informacion-adicional">Información Adicional</label>
+                        <textarea id="informacion-adicional" class="form-control" placeholder="Introduzca cualquier información adicional que se pueda requerir."></textarea>
+                    </div>
+
+                    <div class="toggle-container">
+                        <div class="toggle-info">
+                            <h4 class="toggle-title">Publicar Inmediatamente</h4>
+                            <p class="toggle-description">Hacer esta convocatoria visible para todos los usuarios</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="toggle-container">
+                        <div class="toggle-info">
+                            <h4 class="toggle-title">Resaltar Convocatoria</h4>
+                            <p class="toggle-description">Destaque esta convocatoria prominentemente en la plataforma</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie del modal -->
+            <div class="modal-footer">
+                <button class="btn-cancel">Cancelar</button>
+                <button class="btn-create">
+                    <span class="btn-create-icon">📄</span>
+                    Crear Convocatoria
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Script para manejar el cambio de rol
+        document.getElementById('roleToggle').addEventListener('change', function() {
+            if (!this.checked) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        // Script para manejar el cierre del modal
+        document.querySelector('.modal-close').addEventListener('click', function() {
+            window.location.href = 'dashboard-profesional.html';
+        });
+
+        document.querySelector('.btn-cancel').addEventListener('click', function() {
+            window.location.href = 'dashboard-profesional.html';
+        });
+
+        // Script para manejar la creación de la convocatoria
+        document.querySelector('.btn-create').addEventListener('click', function() {
+            // Aquí iría la lógica para crear la convocatoria
+            alert('Convocatoria creada con éxito');
+            window.location.href = 'dashboard-profesional.html';
+        });
+
+        // Script para manejar los selectores de fecha
+        const fechaSelectors = document.querySelectorAll('.form-date');
+        fechaSelectors.forEach(selector => {
+            selector.addEventListener('click', function() {
+                // En un caso real, aquí se abriría un date picker
+                const fechaText = this.querySelector('.form-date-text');
+                const today = new Date();
+                const formattedDate = today.toLocaleDateString('es-ES');
+                fechaText.textContent = formattedDate;
+            });
+        });
+    </script>
+</body>
+</html>

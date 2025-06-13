@@ -20,14 +20,13 @@
                 <li id="brand-container">
                     <div class="brand-container">
                         <div class="column" id="logo">
-                            <img src="../../UN intercambio logo.png" alt="Logo Un Intercambio" id="logoIntercambio">
+                            <img src="https://cdiac.manizales.unal.edu.co/imagenes/LogosMini/un.png" alt="Logo Un Intercambio" id="logoIntercambio" style="height:40px; width:auto; max-width:120px; object-fit:contain; display:block;">
                         </div>
-                        <span style="font-size:1.2em;font-weight:600;margin-left:10px;">Universidad Intercambio</span>
                     </div>
                 </li>
                 <li><a href="Convenios.html">Convenios</a></li>
-                <li><a href="Analytics.html">Analytics</a></li>
-                <li style="margin-left:auto;"><a class="button-container"><button id="cerrar-sesion" onclick="logout()">Cerrar sesión</button></a></li>
+                <li><a href="dashboard.html">Analytics</a></li>
+                <li style="margin-left:auto;"><a class="button-container"><button id="cerrar-sesion" onclick="logout()">Log Out</button></a></li>
             </ul>
         </nav>
     </header>
@@ -53,7 +52,7 @@
 
     <script>
         function logout() {
-            window.location.href = '../login.html';
+            window.location.href = '../index.html';
         }
 
         // Estado global de filtros para la API
@@ -242,11 +241,12 @@
                 actions.className = 'card-actions';
                 const editBtn = document.createElement('button');
                 editBtn.textContent = 'Editar';
-                editBtn.onclick = () => showEditPopup(item);
+                editBtn.onclick = (e) => { e.stopPropagation(); showEditPopup(item); };
                 actions.appendChild(editBtn);
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Eliminar';
-                deleteBtn.onclick = async () => {
+                deleteBtn.onclick = async (e) => {
+                    e.stopPropagation();
                     if (confirm('¿Seguro que deseas eliminar este convenio?')) {
                         await fetch(`http://127.0.0.1:8000/convocatorias/${item.id || item._id || item._id?.$oid}`, { method: 'DELETE' });
                         await refreshCards();
@@ -256,8 +256,93 @@
                 content.appendChild(actions);
 
                 card.appendChild(content);
+                // Evento para mostrar popup de detalles
+                card.addEventListener('click', function(e) {
+                    // Evita que el click en los botones de editar/eliminar abra el popup
+                    if (e.target.tagName === 'BUTTON') return;
+                    showDetailPopup(item);
+                });
                 container.appendChild(card);
             });
+        }
+
+        // Popup de detalles
+        function showDetailPopup(item) {
+            const popup = document.getElementById('popup');
+            const popupContent = document.getElementById('popup-content');
+            const overlay = document.getElementById('popup-overlay');
+            // Detecta si es no vigente para aplicar clase
+            const isNoVigente = item.state && item.state.toLowerCase() === 'no vigente';
+            const headerClass = 'popup-header' + (isNoVigente ? ' no-vigente' : '');
+            const badgeClass = 'popup-badge' + (isNoVigente ? ' no-vigente' : ' qualified');
+            popupContent.innerHTML = `
+                <div class="${headerClass}">
+                    <div class="popup-header-bg">
+                        <div class="popup-header-row">
+                            <div class="popup-header-title">
+                                <span class="popup-title-main">${item.institution}</span>
+                                <span class="popup-title-sub">Escuela de Ingeniería - Convocatoria 2023</span>
+                            </div>
+                            <img src="../assets/flags/${item.country}.png" alt="${item.country} flag" class="popup-flag">
+                        </div>
+                        <div class="popup-badges">
+                            <span class="${badgeClass}">${item.state ? item.state.toUpperCase() : ''}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-body">
+                    <div class="popup-section-title">Información de la Convocatoria</div>
+                    <div class="popup-info-grid">
+                        <div>
+                            <div class="popup-info-label">UNIVERSIDAD</div>
+                            <div class="popup-info-value">${item.institution}</div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">PAÍS</div>
+                            <div class="popup-info-value"><img src="../assets/flags/${item.country}.png" alt="${item.country} flag" class="popup-flag-small"> ${item.country}</div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">TIPO DE ACUERDO</div>
+                            <div class="popup-info-value">${item.agreementType || '-'}</div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">LENGUAJE</div>
+                            <div class="popup-info-value">${item.languages || '-'}</div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">ESTADO</div>
+                            <div class="popup-info-value"><span class="${badgeClass}">${item.state ? item.state.toUpperCase() : ''}</span></div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">VALIDEZ</div>
+                            <div class="popup-info-value"><i class="fas fa-calendar-check"></i> ${item.validity || '-'}</div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">AÑO SUSCRIPCIÓN</div>
+                            <div class="popup-info-value">${item.subscriptionYear || '-'}</div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">PLAZAS DISPONIBLES</div>
+                            <div class="popup-info-value">${item.availableSlots || '-'}</div>
+                        </div>
+                        <div>
+                            <div class="popup-info-label">DURACIÓN</div>
+                            <div class="popup-info-value">${item.duration || '-'}</div>
+                        </div>
+                    </div>
+                    <div class="popup-section-title">Descripción</div>
+                    <div class="popup-description">${item.description || 'Sin descripción disponible.'}</div>
+                    <div class="popup-section-title">Links de Interés</div>
+                    <div class="popup-links">
+                        ${item.dreLink ? `<a href="${item.dreLink}" target="_blank" class="popup-link"><i class="fas fa-file-alt"></i> DRE Link</a>` : ''}
+                        ${item.agreementLink ? `<a href="${item.agreementLink}" target="_blank" class="popup-link"><i class="fas fa-file-contract"></i> Agreement Link</a>` : ''}
+                        ${item.internationalLink ? `<a href="${item.internationalLink}" target="_blank" class="popup-link"><i class="fas fa-globe"></i> International Link</a>` : ''}
+                    </div>
+                </div>
+            `;
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+            overlay.onclick = hidePopup;
         }
 
         function showEditPopup(item) {
