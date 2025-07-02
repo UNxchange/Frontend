@@ -1,0 +1,375 @@
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+// Organismos
+import Header from '../organisms/Header'
+
+// Moléculas
+import SearchBar from '../molecules/SearchBar'
+import FilterDropdown from '../molecules/FilterDropdown'
+import UniversityCard, { Universidad } from '../molecules/UniversityCard'
+import UniversityPopup from '../molecules/UniversityPopup'
+
+// Átomos
+import Button from '../atoms/Button'
+import Pagination from '../atoms/Pagination'
+
+// Servicios y tipos
+import conveniosService, { UniversidadApi, ConveniosResponse } from '../services/conveniosService'
+
+// Estilos
+import '../atoms/navbar.css'
+import '../atoms/convenios.css'
+
+interface Filters {
+  q: string
+  country: string
+  language: string
+  state: string
+  agreement_type: string
+  subscription_level: string
+  limit: number
+  skip: number
+}
+
+const Convenios: React.FC = () => {
+  const navigate = useNavigate()
+  
+  // Estados principales
+  const [universidades, setUniversidades] = useState<UniversidadApi[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedUniversity, setSelectedUniversity] = useState<UniversidadApi | null>(null)
+  const [showPopup, setShowPopup] = useState(false)
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalResults, setTotalResults] = useState(0)
+
+  // Estados de búsqueda y filtros
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filters, setFilters] = useState<Filters>({
+    q: '',
+    country: '',
+    language: '',
+    state: '',
+    agreement_type: '',
+    subscription_level: '',
+    limit: 5, // Valor por defecto que permite múltiples páginas
+    skip: 0
+  })
+
+  // Opciones para filtros
+  const [filterOptions, setFilterOptions] = useState({
+    countries: [] as string[],
+    languages: [] as string[],
+    states: [] as string[],
+    agreementTypes: [] as string[],
+    subscriptionLevels: [] as string[]
+  })
+
+  // Cargar datos iniciales
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true)
+      try {
+        const response = await conveniosService.fetchConvenios(filters)
+        setUniversidades(response.data)
+        setTotalPages(response.totalPages)
+        setTotalResults(response.total)
+        setCurrentPage(response.page)
+        
+        // Cargar opciones de filtros
+        const options = conveniosService.getFilterOptions()
+        setFilterOptions(options)
+      } catch (error) {
+        console.error('Error loading data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  // Recargar datos cuando cambien los filtros (excluyendo paginación)
+  useEffect(() => {
+    const refreshData = async () => {
+      setLoading(true)
+      try {
+        // Crear filtros sin skip para nueva búsqueda
+        const searchFilters = {
+          ...filters,
+          skip: (currentPage - 1) * filters.limit
+        }
+        const response = await conveniosService.fetchConvenios(searchFilters)
+        setUniversidades(response.data)
+        setTotalPages(response.totalPages)
+        setTotalResults(response.total)
+      } catch (error) {
+        console.error('Error refreshing data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    refreshData()
+  }, [filters.q, filters.country, filters.language, filters.state, filters.agreement_type, filters.subscription_level, filters.limit, currentPage])
+
+  // Calcular si hay filtros activos
+  const hasActiveFilters = Object.values({
+    country: filters.country,
+    language: filters.language,
+    state: filters.state,
+    agreement_type: filters.agreement_type,
+    subscription_level: filters.subscription_level
+  }).some(value => value !== '')
+
+  // Funciones de manejo
+  const handleSearch = () => {
+    setFilters(prev => ({
+      ...prev,
+      q: searchTerm
+    }))
+    setCurrentPage(1) // Reset a la primera página
+  }
+
+  const handleFilterChange = (key: string, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }))
+    setCurrentPage(1) // Reset a la primera página
+  }
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
+
+  const handleClearSearch = () => {
+    setSearchTerm('')
+    setFilters(prev => ({
+      ...prev,
+      q: ''
+    }))
+    setCurrentPage(1) // Reset a la primera página
+  }
+
+  const handleClearAllFilters = () => {
+    setSearchTerm('')
+    setFilters({
+      q: '',
+      country: '',
+      language: '',
+      state: '',
+      agreement_type: '',
+      subscription_level: '',
+      limit: 5,
+      skip: 0
+    })
+    setCurrentPage(1)
+    setShowFilterDropdown(false) // Cerrar el dropdown después de limpiar
+  }
+
+  const handleItemsPerPageChange = (limit: number) => {
+    setFilters(prev => ({
+      ...prev,
+      limit: limit
+    }))
+    setCurrentPage(1) // Reset a la primera página
+  }
+
+  const handleUniversityClick = (universidad: UniversidadApi) => {
+    setSelectedUniversity(universidad)
+    setShowPopup(true)
+  }
+
+  const handleEdit = async (universidad: UniversidadApi) => {
+    // Aquí podrías abrir un modal de edición
+    console.log('Editando universidad:', universidad)
+    // Por ahora solo mostramos el popup de detalles
+    handleUniversityClick(universidad)
+  }
+
+  const handleDelete = async (universidad: UniversidadApi) => {
+    try {
+      const id = universidad.id || universidad._id || (universidad._id as any)?.$oid
+      if (id) {
+        await conveniosService.deleteConvenio(id)
+        // Recargar datos manteniendo la página actual
+        const searchFilters = {
+          ...filters,
+          skip: (currentPage - 1) * filters.limit
+        }
+        const response = await conveniosService.fetchConvenios(searchFilters)
+        setUniversidades(response.data)
+        setTotalPages(response.totalPages)
+        setTotalResults(response.total)
+      }
+    } catch (error) {
+      console.error('Error deleting universidad:', error)
+      alert('Error al eliminar el convenio')
+    }
+  }
+
+  const closePopup = () => {
+    setShowPopup(false)
+    setSelectedUniversity(null)
+  }
+
+  const handleLogout = () => {
+    navigate('/login')
+  }
+
+  // Cerrar dropdown de filtros al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (!target.closest('.filter-dropdown-container')) {
+        setShowFilterDropdown(false)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => {
+      document.removeEventListener('click', handleClickOutside)
+    }
+  }, [])
+
+  return (
+    <div>
+      {/* Header */}
+      <Header onLogout={handleLogout} />
+
+      {/* Search and Filters */}
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onSearch={handleSearch}
+        placeholder="Buscar universidades..."
+        showFilterDropdown={showFilterDropdown}
+        onToggleFilter={() => setShowFilterDropdown(!showFilterDropdown)}
+        isSearching={loading}
+        onClearSearch={handleClearSearch}
+        hasActiveFilters={hasActiveFilters}
+        filterDropdownContent={
+          <FilterDropdown
+            countries={filterOptions.countries}
+            languages={filterOptions.languages}
+            states={filterOptions.states}
+            agreementTypes={filterOptions.agreementTypes}
+            subscriptionLevels={filterOptions.subscriptionLevels}
+            filters={{
+              country: filters.country,
+              language: filters.language,
+              state: filters.state,
+              agreement_type: filters.agreement_type,
+              subscription_level: filters.subscription_level
+            }}
+            onFilterChange={handleFilterChange}
+            onClearFilters={handleClearAllFilters}
+          />
+        }
+      />
+
+      {/* Content */}
+      <div className="content-section">
+        {loading ? (
+          <div className="loading-container">
+            <div className="loading-text">Cargando...</div>
+          </div>
+        ) : (
+          <>
+            {/* University Cards Grid usando CSS puro */}
+            <div className="container">
+              {universidades.map((universidad: UniversidadApi) => {
+                const key = universidad.id || 
+                           (typeof universidad._id === 'string' ? universidad._id : 
+                            universidad._id?.$oid) || 
+                           Math.random().toString()
+                
+                return (
+                  <UniversityCard
+                    key={key}
+                    universidad={universidad as any}
+                    onClick={handleUniversityClick}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                )
+              })}
+            </div>
+
+            {/* Empty state */}
+            {universidades.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-message">
+                  No se encontraron convenios
+                </div>
+                <Button
+                  onClick={handleClearAllFilters}
+                  variant="primary"
+                >
+                  Limpiar filtros
+                </Button>
+              </div>
+            )}
+
+            {/* Información de paginación */}
+            {!loading && universidades.length > 0 && (
+              <div className="pagination-info">
+                <span>
+                  Mostrando {((currentPage - 1) * filters.limit) + 1} - {Math.min(currentPage * filters.limit, totalResults)} de {totalResults} resultados
+                  <small style={{ marginLeft: '10px', color: '#888' }}>
+                    (Página {currentPage} de {totalPages})
+                  </small>
+                </span>
+                <select 
+                  value={filters.limit} 
+                  onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                  className="items-per-page-select"
+                >
+                  <option value={3}>3 por página</option>
+                  <option value={5}>5 por página</option>
+                  <option value={10}>10 por página</option>
+                  <option value={20}>20 por página</option>
+                  <option value={50}>50 por página</option>
+                  <option value={100}>100 por página</option>
+                </select>
+              </div>
+            )}
+
+            {/* Paginación */}
+            {!loading && totalPages > 0 && (
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                margin: '30px 0',
+                padding: '20px',
+                backgroundColor: '#f8f9fa',
+                borderRadius: '8px'
+              }}>
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  disabled={loading}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Popup */}
+      <UniversityPopup
+        universidad={selectedUniversity as any}
+        isOpen={showPopup}
+        onClose={closePopup}
+      />
+    </div>
+  )
+}
+
+export default Convenios
