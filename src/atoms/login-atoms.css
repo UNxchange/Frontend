@@ -25,3 +25,34 @@
 .forgot-password:hover, .signup-link:hover {
     color: #3498db;
 }
+
+/* Estilos para mensajes de error y éxito */
+.error-message {
+    background-color: #fee;
+    color: #c33;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #fcc;
+    font-size: 14px;
+}
+
+.success-message {
+    background-color: #efe;
+    color: #363;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #cfc;
+    font-size: 14px;
+}
+
+/* Estilos para botones deshabilitados */
+.login-button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.login-button:disabled:hover {
+    background-color: #9ca3af;
+}

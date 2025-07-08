@@ -1,15 +1,16 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Button from '../atoms/Button'
+import { useAuth } from '../hooks/useAuth'
 
-interface HeaderProps {
-  onLogout?: () => void
-}
+const Header: React.FC = () => {
+  const { logout, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
 
-const Header: React.FC<HeaderProps> = ({ onLogout }) => {
   const handleLogout = () => {
     console.log('Cerrando sesión...')
-    onLogout?.()
+    logout()
+    navigate('/login')
   }
 
   return (
@@ -48,7 +49,7 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
           </li>
           
           <li className="ml-auto">
-            <Link to="/login">
+            {isAuthenticated ? (
               <Button 
                 onClick={handleLogout}
                 variant="danger"
@@ -56,7 +57,16 @@ const Header: React.FC<HeaderProps> = ({ onLogout }) => {
               >
                 Log Out
               </Button>
-            </Link>
+            ) : (
+              <Link to="/login">
+                <Button 
+                  variant="primary"
+                  className="px-4 py-2"
+                >
+                  Log In
+                </Button>
+              </Link>
+            )}
           </li>
         </ul>
       </nav>
