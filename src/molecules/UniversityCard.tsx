@@ -10,7 +10,7 @@ export interface Universidad {
   agreementType: string
   validity?: string
   state: 'vigente' | 'no-vigente' | 'pendiente'
-  languages?: string
+  languages?: string | string[]
   subscriptionYear?: string
   subscriptionLevel?: string
   description?: string
@@ -144,7 +144,11 @@ const UniversityCard: React.FC<UniversityCardProps> = ({
           
           <div>
             <strong>IDIOMAS</strong>
-            <div>{universidad.languages || '-'}</div>
+            <div>
+              {Array.isArray(universidad.languages) 
+                ? universidad.languages.join(', ') 
+                : universidad.languages || '-'}
+            </div>
           </div>
           
           <div>
@@ -178,12 +182,12 @@ const UniversityCard: React.FC<UniversityCardProps> = ({
         {(onEdit || onDelete) && (
           <div className="card-actions">
             {onEdit && (
-              <button onClick={() => handleEdit({} as React.MouseEvent)}>
+              <button onClick={handleEdit}>
                 Editar
               </button>
             )}
             {onDelete && (
-              <button onClick={() => handleDelete({} as React.MouseEvent)}>
+              <button onClick={handleDelete}>
                 Eliminar
               </button>
             )}

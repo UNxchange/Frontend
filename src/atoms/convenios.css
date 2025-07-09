@@ -248,9 +248,10 @@ nav ul li a:hover {
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   margin-bottom: 16px;
+  max-width: 100%;
 }
 
 .filter-dropdown {
@@ -847,12 +848,10 @@ nav ul li a:hover {
   min-width: 40px;
   height: 40px;
   color: #cbd5e1;
-  font-weight: bold;
   font-size: 16px;
-}
-
-.nav-text {
-  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Responsive design for pagination */
@@ -1040,15 +1039,16 @@ nav ul li a:hover {
 }
 
 .pagination-ellipsis {
-  color: #94a3b8;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 40px;
   height: 40px;
+  color: #cbd5e1;
+  font-size: 16px;
+  font-weight: 600;
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Responsive pagination */

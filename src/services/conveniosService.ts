@@ -5,6 +5,9 @@ interface ApiFilters {
   state?: string
   agreement_type?: string
   subscription_level?: string
+  validity?: string
+  subscription_year?: string
+  institution?: string
   limit?: number
   skip?: number
 }
@@ -44,7 +47,7 @@ export interface UniversidadApi {
   agreementType: string
   validity?: string
   state: 'vigente' | 'no-vigente' | 'pendiente'
-  languages?: string
+  languages?: string | string[]
   subscriptionYear?: string
   subscriptionLevel?: string
   description?: string
@@ -197,13 +200,13 @@ class ConveniosService {
 
       const params = new URLSearchParams()
       
-      // Asegurar valores por defecto para paginación
+      // Extraer valores para cálculos internos (sin forzar valores por defecto en la request)
       const limit = filters.limit || 10
       const skip = filters.skip || 0
       
-      // Solo enviar parámetros que tengan valores
-      Object.entries({ ...filters, limit, skip }).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+      // Solo enviar parámetros que tengan valores, sin forzar valores por defecto
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '' && value !== 0) {
           params.append(key, value.toString())
         }
       })
@@ -292,7 +295,10 @@ class ConveniosService {
         agreementType,
         validity: item.vigencia || item.validity || '',
         state,
-        languages: Array.isArray(item.languages) ? item.languages.join(', ') : (item.languages || item.idiomas || ''),
+        languages: Array.isArray(item.languages) ? item.languages : 
+                   (item.languages || item.idiomas ? 
+                    (item.languages || item.idiomas).split(',').map((lang: string) => lang.trim()).filter(Boolean) : 
+                    []),
         subscriptionYear: item.subscriptionYear || item.añoSuscripcion || '',
         subscriptionLevel: item.subscriptionLevel || item.nivelSuscripcion || '',
         description: typeof properties === 'object' ? JSON.stringify(properties) : (item.description || item.descripcion || ''),
@@ -349,6 +355,7 @@ class ConveniosService {
         "Doble Titulación", 
         "Marco", 
         "Específico",
+        "Marco+Intercambio",
         "Cooperación Académica",
         "Intercambio Docente",
         "Prácticas Profesionales"
@@ -363,7 +370,19 @@ class ConveniosService {
         "Facultad de Economía",
         "Facultad de Educación",
         "Facultad de Ciencias Sociales",
+        "Universidad Nacional de Colombia",
         "Institucional"
+      ],
+      validityOptions: [
+        "Indefinido",
+        "5 años",
+        "10 años",
+        "3 años",
+        "Por definir"
+      ],
+      subscriptionYears: [
+        "2024", "2023", "2022", "2021", "2020", "2019", "2018", "2017", 
+        "2016", "2015", "2014", "2013", "2012", "2011", "2010"
       ]
     }
   }

@@ -6,12 +6,16 @@ interface FilterDropdownProps {
   states: string[]
   agreementTypes: string[]
   subscriptionLevels: string[]
+  validityOptions: string[]
+  subscriptionYears: string[]
   filters: {
     country: string
     language: string
     state: string
     agreement_type: string
     subscription_level: string
+    validity: string
+    subscription_year: string
   }
   onFilterChange: (key: string, value: string) => void
   onClearFilters?: () => void
@@ -23,6 +27,8 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
   states,
   agreementTypes,
   subscriptionLevels,
+  validityOptions,
+  subscriptionYears,
   filters,
   onFilterChange,
   onClearFilters
@@ -73,7 +79,9 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         {createFilterSelect('language', 'Idioma', languages, filters.language)}
         {createFilterSelect('state', 'Estado', states, filters.state)}
         {createFilterSelect('agreement_type', 'Tipo de Acuerdo', agreementTypes, filters.agreement_type)}
-        {createFilterSelect('subscription_level', 'Nivel de Suscripción', subscriptionLevels, filters.subscription_level)}
+        {createFilterSelect('subscription_level', 'Dependencia', subscriptionLevels, filters.subscription_level)}
+        {createFilterSelect('validity', 'Vigencia', validityOptions, filters.validity)}
+        {createFilterSelect('subscription_year', 'Año de Suscripción', subscriptionYears, filters.subscription_year)}
       </div>
       
       {hasActiveFilters && (
