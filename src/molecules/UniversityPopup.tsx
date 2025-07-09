@@ -1,5 +1,6 @@
 import React from 'react'
 import Badge from '../atoms/Badge'
+import './UniversityPopup.css'
 
 interface Universidad {
   id: number | string
@@ -8,11 +9,11 @@ interface Universidad {
   city?: string
   agreementType: string
   validity?: string
-  state: 'vigente' | 'no-vigente' | 'pendiente'
-  languages?: string
+  state: string
+  languages?: string | string[]
   subscriptionYear?: string
   subscriptionLevel?: string
-  description?: string
+  properties?: string
   dreLink?: string
   agreementLink?: string
   internationalLink?: string
@@ -33,172 +34,253 @@ const UniversityPopup: React.FC<UniversityPopupProps> = ({
 }) => {
   if (!isOpen || !universidad) return null
 
+  // Debug: verificar datos recibidos
+  console.log('Universidad data:', universidad)
+  console.log('Properties field:', universidad.properties)
+
+  // Helper function to format languages
+  const formatLanguages = (languages: string | string[] | undefined): string => {
+    if (!languages) return 'No especificado'
+    if (Array.isArray(languages)) {
+      return languages.join(', ')
+    }
+    return languages
+  }
+
+  // Helper function to check if validity date is expired
+  const isValidityExpired = (validity: string | undefined): boolean => {
+    if (!validity) return false
+    
+    const currentDate = new Date()
+    const validityDate = new Date(validity)
+    
+    // Si la fecha no es válida, no está expirada
+    if (isNaN(validityDate.getTime())) return false
+    
+    return validityDate < currentDate
+  }
+
   const getStatusVariant = (status: string): 'vigente' | 'no-vigente' | 'pendiente' => {
     if (status.toLowerCase() === 'vigente') return 'vigente'
     if (status.toLowerCase() === 'no vigente') return 'no-vigente'
     return 'pendiente'
   }
 
-  const isNoVigente = universidad.state.toLowerCase() === 'no vigente'
+  const isNoVigente = universidad.state.toLowerCase() === 'no vigente' || universidad.state.toLowerCase() === 'no-vigente'
 
   return (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50"
+        className="university-popup-overlay"
         onClick={onClose}
-      />
-      
-      {/* Popup */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl z-51 max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl z-10"
+      >
+        {/* Modal */}
+        <div
+          className="university-popup-modal"
+          onClick={(e) => e.stopPropagation()}
         >
-          &times;
-        </button>
-
-        {/* Header */}
-        <div className={`p-6 ${isNoVigente ? 'bg-red-50' : 'bg-blue-50'} rounded-t-lg`}>
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                {universidad.institution}
-              </h2>
-              <p className="text-gray-600">Escuela de Ingeniería - Convocatoria 2023</p>
-            </div>
-            <img 
-              src={`/src/assets/flags/${universidad.country}.png`} 
-              alt={`${universidad.country} flag`} 
-              className="w-12 h-8 object-cover rounded"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/src/assets/flags/Internacional.png'
-              }}
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge variant={getStatusVariant(universidad.state)}>
-              {universidad.state.toUpperCase()}
-            </Badge>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="p-6">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">
-            Información de la Convocatoria
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Universidad</div>
-              <div className="mt-1 text-gray-900">{universidad.institution}</div>
-            </div>
+          {/* Header with university name and flag */}
+          <div className={`university-popup-header ${universidad.state}`}>
+            <button
+              onClick={onClose}
+              className="university-popup-close"
+            >
+              ×
+            </button>
             
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">País</div>
-              <div className="mt-1 text-gray-900 flex items-center gap-2">
+            <div className="flex items-start justify-between">
+              <div className="flex-1 pr-4">
+                <h2 className="university-popup-title">
+                  {universidad.institution}
+                </h2>
+                <p className="university-popup-subtitle">
+                  Escuela de Ingeniería - Convocatoria 2023
+                </p>
+              </div>
+              
+              <div className="flex-shrink-0">
                 <img 
                   src={`/src/assets/flags/${universidad.country}.png`} 
                   alt={`${universidad.country} flag`} 
-                  className="w-6 h-4 object-cover rounded"
+                  className="university-popup-flag"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/src/assets/flags/Internacional.png'
                   }}
                 />
-                {universidad.country}
               </div>
-            </div>
-            
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Tipo de Acuerdo</div>
-              <div className="mt-1 text-gray-900">{universidad.agreementType || '-'}</div>
-            </div>
-            
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Lenguaje</div>
-              <div className="mt-1 text-gray-900">{universidad.languages || '-'}</div>
-            </div>
-            
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Estado</div>
-              <div className="mt-1">
-                <Badge variant={getStatusVariant(universidad.state)}>
-                  {universidad.state.toUpperCase()}
-                </Badge>
-              </div>
-            </div>
-            
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Validez</div>
-              <div className="mt-1 text-gray-900 flex items-center gap-1">
-                <i className="fas fa-calendar-check text-green-500"></i>
-                {universidad.validity || '-'}
-              </div>
-            </div>
-            
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Año Suscripción</div>
-              <div className="mt-1 text-gray-900">{universidad.subscriptionYear || '-'}</div>
-            </div>
-            
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Plazas Disponibles</div>
-              <div className="mt-1 text-gray-900">{universidad.availableSlots || '-'}</div>
-            </div>
-            
-            <div>
-              <div className="text-sm font-medium text-gray-500 uppercase tracking-wider">Duración</div>
-              <div className="mt-1 text-gray-900">{universidad.duration || '-'}</div>
             </div>
           </div>
 
-          {/* Description */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2 text-gray-800">Descripción</h3>
-            <p className="text-gray-700">
-              {universidad.description || 'Sin descripción disponible.'}
-            </p>
-          </div>
+          {/* Content */}
+          <div className="university-popup-content">
+            {/* Information Section */}
+            <div className="university-popup-section">
+              <h3 className="university-popup-section-title">
+                Información de la Convocatoria
+              </h3>
+              
+              <div className="university-popup-info-grid">
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    UNIVERSIDAD
+                  </div>
+                  <div className="university-popup-info-value">
+                    {universidad.institution}
+                  </div>
+                </div>
+                
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    PAÍS
+                  </div>
+                  <div className="university-popup-info-value">
+                    {universidad.country}
+                  </div>
+                </div>
+                
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    TIPO DE ACUERDO
+                  </div>
+                  <div className="university-popup-info-value">
+                    {universidad.agreementType || 'No especificado'}
+                  </div>
+                </div>
+                
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    LENGUAJE
+                  </div>
+                  <div className="university-popup-info-value">
+                    {formatLanguages(universidad.languages)}
+                  </div>
+                </div>
+                
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    ESTADO
+                  </div>
+                  <div className="university-popup-info-value">
+                    <Badge variant={getStatusVariant(universidad.state)}>
+                      {universidad.state.toUpperCase()}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    VALIDEZ
+                  </div>
+                  <div className="university-popup-info-value">
+                    <span className={`university-popup-validity-icon ${isValidityExpired(universidad.validity) ? 'expired' : 'valid'}`}>
+                      {isValidityExpired(universidad.validity) ? '✗' : '✓'}
+                    </span>
+                    {universidad.validity || 'No especificado'}
+                  </div>
+                </div>
+                
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    AÑO SUSCRIPCIÓN
+                  </div>
+                  <div className="university-popup-info-value">
+                    {universidad.subscriptionYear || 'No especificado'}
+                  </div>
+                </div>
+                
+                <div className="university-popup-info-item">
+                  <div className="university-popup-info-label">
+                    NIVEL SUSCRIPCIÓN
+                  </div>
+                  <div className="university-popup-info-value">
+                    {universidad.subscriptionLevel || 'No especificado'}
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          {/* Links */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3 text-gray-800">Links de Interés</h3>
-            <div className="flex flex-wrap gap-3">
-              {universidad.dreLink && (
-                <a
-                  href={universidad.dreLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                >
-                  <i className="fas fa-file-alt"></i>
-                  DRE Link
-                </a>
-              )}
-              {universidad.agreementLink && (
-                <a
-                  href={universidad.agreementLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                >
-                  <i className="fas fa-file-contract"></i>
-                  Agreement Link
-                </a>
-              )}
-              {universidad.internationalLink && (
-                <a
-                  href={universidad.internationalLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
-                >
-                  <i className="fas fa-globe"></i>
-                  International Link
-                </a>
-              )}
+            {/* Description Section */}
+            <div className="university-popup-section">
+              <h3 className="university-popup-section-title">Descripción</h3>
+              <div className="university-popup-description">
+                {universidad.properties ? (
+                  <ul className="list-disc pl-5 space-y-2">
+                    {universidad.properties.split('\n').map((item: string, index: number) => (
+                      <li key={index} className="text-gray-700">
+                        {item.trim()}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mb-0 text-gray-500">
+                    No hay descripción disponible para este convenio.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Links Section */}
+            <div className="university-popup-section">
+              <h3 className="university-popup-section-title">Links de Interés</h3>
+              <div className="university-popup-links-grid">
+                {universidad.agreementLink && (
+                  <a 
+                    href={universidad.agreementLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="university-popup-link-card blue"
+                  >
+                    <div className="university-popup-link-icon">📄</div>
+                    <div className="university-popup-link-title">
+                      Convocatoria Oficial
+                    </div>
+                    <div className="university-popup-link-description">
+                      Documento PDF con todos los detalles
+                    </div>
+                  </a>
+                )}
+                
+                {universidad.internationalLink && (
+                  <a 
+                    href={universidad.internationalLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="university-popup-link-card orange"
+                  >
+                    <div className="university-popup-link-icon">🌐</div>
+                    <div className="university-popup-link-title">
+                      Sitio Web Universidad
+                    </div>
+                    <div className="university-popup-link-description">
+                      Página oficial de la institución
+                    </div>
+                  </a>
+                )}
+                
+                {universidad.dreLink && (
+                  <a 
+                    href={universidad.dreLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="university-popup-link-card red"
+                  >
+                    <div className="university-popup-link-icon">📝</div>
+                    <div className="university-popup-link-title">
+                      Documento DRE
+                    </div>
+                    <div className="university-popup-link-description">
+                      Información académica oficial
+                    </div>
+                  </a>
+                )}
+                
+                {(!universidad.agreementLink && !universidad.internationalLink && !universidad.dreLink) && (
+                  <div className="university-popup-no-links">
+                    <p>No hay enlaces disponibles para este convenio.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
