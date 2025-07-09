@@ -4,7 +4,22 @@ export interface User {
     id: string;
     email: string;
     name: string;
-    role: 'student' | 'professional' | 'admin';
+    role: 'estudiante' | 'profesional' | 'administrador' | 'coordinator' | 'guest';
+}
+
+export interface MenuItem {
+    id: string;
+    label: string;
+    path: string;
+    icon?: string;
+    roles: string[];
+    isActive?: boolean;
+    subItems?: MenuItem[];
+}
+
+export interface NavigationConfig {
+    menuItems: MenuItem[];
+    userMenuItems: MenuItem[];
 }
 
 export interface LoginCredentials {

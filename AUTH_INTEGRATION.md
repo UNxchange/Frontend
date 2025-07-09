@@ -27,7 +27,12 @@ La configuración se centraliza en `src/config/api.ts`:
 
 ```typescript
 export const API_CONFIG = {
-  BASE_URL: 'http://127.0.0.1:8000',
+  // Auth service on Heroku
+  AUTH_BASE_URL: 'https://unxchange-auth-backend-9208adf2339d.herokuapp.com',
+  // Convocatorias service local
+  CONVOCATORIAS_BASE_URL: 'http://127.0.0.1:8000',
+  // Legacy BASE_URL for auth compatibility
+  BASE_URL: 'https://unxchange-auth-backend-9208adf2339d.herokuapp.com',
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/api/v1/auth/login',
@@ -128,6 +133,19 @@ client_secret=
 ✅ **Headers Automáticos**: Inclusión automática de tokens en requests
 ✅ **Token Expirado**: Manejo automático de tokens expirados
 
+## Configuración de Múltiples Backends
+
+La aplicación actualmente utiliza dos backends diferentes:
+
+- **🔐 Autenticación**: `https://unxchange-auth-backend-9208adf2339d.herokuapp.com` (Heroku)
+- **📋 Convocatorias**: `http://127.0.0.1:8000` (Local)
+
+### Implementación
+
+- `HttpClient`: Para servicios de autenticación (Heroku)
+- `ConvocatoriasHttpClient`: Para servicios de convocatorias (Local)
+- Ambos clientes incluyen automáticamente los headers de autenticación
+
 ## Próximos Pasos
 
 1. **Refresh Token**: Implementar renovación automática de tokens
@@ -140,8 +158,9 @@ client_secret=
 
 Para probar la integración:
 
-1. Asegúrate de que el backend esté corriendo en `http://127.0.0.1:8000`
-2. Navega a `/login` en tu aplicación
+1. **Autenticación**: Asegúrate de que el backend de auth esté corriendo en `https://unxchange-auth-backend-9208adf2339d.herokuapp.com`
+2. **Convocatorias**: Asegúrate de que el backend de convocatorias esté corriendo en `http://127.0.0.1:8000`
+3. Navega a `/login` en tu aplicación
 3. Introduce credenciales válidas
 4. Verifica que se redirija correctamente después del login
 5. Prueba el logout desde el header

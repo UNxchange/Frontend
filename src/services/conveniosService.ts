@@ -55,11 +55,146 @@ export interface UniversidadApi {
   duration?: string
 }
 
-const API_BASE_URL = 'http://127.0.0.1:8000'
+import { HttpClient } from '../utils/httpClient'
+import { API_CONFIG, APP_CONFIG } from '../config/api'
+import { AuthService } from './authService'
+
+// Specialized HTTP client for convocatorias (local backend)
+class ConvocatoriasHttpClient {
+  private static baseURL = API_CONFIG.CONVOCATORIAS_BASE_URL
+
+  static async request<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`
+    
+    // Agregar headers por defecto
+    const defaultHeaders: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    }
+
+    // Agregar token de autenticación
+    const token = AuthService.getToken()
+    if (token) {
+      defaultHeaders['Authorization'] = `Bearer ${token}`
+    }
+
+    // Combinar headers
+    const headers = {
+      ...defaultHeaders,
+      ...options.headers,
+    }
+
+    try {
+      console.log(`Making request to: ${url}`)
+      console.log('Headers:', headers)
+      
+      const response = await fetch(url, {
+        ...options,
+        headers,
+      })
+
+      console.log(`Response status: ${response.status}`)
+
+      if (!response.ok) {
+        // Obtener el mensaje de error del servidor si es posible
+        let errorMessage = `HTTP error! status: ${response.status}`
+        let errorData = null
+        
+        try {
+          const contentType = response.headers.get('content-type')
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json()
+            if (errorData.detail) {
+              errorMessage = errorData.detail
+            }
+          } else {
+            const textResponse = await response.text()
+            errorMessage = textResponse || errorMessage
+          }
+        } catch (parseError) {
+          console.warn('Could not parse error response:', parseError)
+        }
+
+        // Manejo específico de errores de autenticación
+        if (response.status === 401) {
+          console.error('🔐 Error de autenticación en convocatorias:', errorMessage)
+          console.error('🔧 El servidor local necesita validar tokens de:', API_CONFIG.AUTH_BASE_URL || API_CONFIG.BASE_URL)
+          console.error('💡 Configura tu servidor local para hacer requests a /api/v1/auth/me del servicio de Heroku')
+          
+          // Solo deslogear si es un error real de token expirado
+          if (typeof errorMessage === 'string' && errorMessage.includes('Not authenticated')) {
+            console.warn('⚠️ Deslogueando debido a token inválido...')
+            AuthService.logout()
+            window.location.href = APP_CONFIG.LOGIN_PATH
+            throw new Error('Tu servidor local de convocatorias no puede validar el token de Heroku. Contacta al administrador.')
+          }
+        }
+
+        if (response.status === 403) {
+          console.error('🚫 Acceso denegado a convocatorias:', errorMessage)
+          throw new Error('Acceso denegado. Tu token puede no tener permisos para convocatorias.')
+        }
+
+        throw new Error(errorMessage)
+      }
+
+      const data = await response.json()
+      console.log('Response data:', data)
+      return data
+    } catch (error) {
+      console.error('Request error:', error)
+      
+      // Si es un error de red, no redirigir automáticamente
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('No se pudo conectar al servicio de convocatorias. Verifique que esté funcionando en http://127.0.0.1:8000')
+      }
+      throw error
+    }
+  }
+}
 
 class ConveniosService {
+  // Método de diagnóstico para verificar la conectividad
+  async checkConvocatoriasService(): Promise<{ status: string, url: string, message: string }> {
+    const url = `${API_CONFIG.CONVOCATORIAS_BASE_URL}/convocatorias/?limit=1`
+    
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+
+      return {
+        status: response.ok ? 'success' : 'error',
+        url,
+        message: response.ok 
+          ? 'Servicio de convocatorias disponible' 
+          : `Error ${response.status}: ${response.statusText}`
+      }
+    } catch (error) {
+      return {
+        status: 'error',
+        url,
+        message: `No se pudo conectar al servicio: ${error instanceof Error ? error.message : 'Error desconocido'}`
+      }
+    }
+  }
+
   async fetchConvenios(filters: ApiFilters = {}): Promise<ConveniosResponse> {
     try {
+      // Primero verificar si el servicio está disponible
+      const serviceCheck = await this.checkConvocatoriasService()
+      if (serviceCheck.status === 'error') {
+        console.warn('Convocatorias service check failed:', serviceCheck.message)
+        // No deslogear, solo mostrar error específico
+        throw new Error(`Servicio no disponible: ${serviceCheck.message}`)
+      }
+
       const params = new URLSearchParams()
       
       // Asegurar valores por defecto para paginación
@@ -73,16 +208,11 @@ class ConveniosService {
         }
       })
 
-
+      console.log('Fetching convocatorias from:', `${API_CONFIG.CONVOCATORIAS_BASE_URL}${API_CONFIG.ENDPOINTS.CONVOCATORIAS.LIST}?${params.toString()}`)
       
-      const response = await fetch(`${API_BASE_URL}/convocatorias/?${params.toString()}`)
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status} - ${response.statusText}`)
-      }
-      
-
-      const data = await response.json()
+      const data = await ConvocatoriasHttpClient.request<any>(`${API_CONFIG.ENDPOINTS.CONVOCATORIAS.LIST}?${params.toString()}`, {
+        method: 'GET'
+      })
       
       // CASO 1: La API ya devuelve datos paginados (formato esperado: {data, total, page, totalPages})
       if (data.data && typeof data.total === 'number') {
@@ -120,6 +250,7 @@ class ConveniosService {
       throw new Error('Formato de respuesta de la API no reconocido')
       
     } catch (error) {
+      console.error('Error fetching convenios:', error)
       throw error
     }
   }
@@ -176,19 +307,12 @@ class ConveniosService {
 
   async updateConvenio(id: string | number, updateData: Partial<UniversidadApi>): Promise<UniversidadApi> {
     try {
-      const response = await fetch(`${API_BASE_URL}/convocatorias/${id}`, {
+      const response = await ConvocatoriasHttpClient.request<UniversidadApi>(API_CONFIG.ENDPOINTS.CONVOCATORIAS.UPDATE(id), {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(updateData)
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      return await response.json()
+      return response
     } catch (error) {
       console.error('Error updating convenio:', error)
       throw error
@@ -197,13 +321,9 @@ class ConveniosService {
 
   async deleteConvenio(id: string | number): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/convocatorias/${id}`, {
+      await ConvocatoriasHttpClient.request<void>(API_CONFIG.ENDPOINTS.CONVOCATORIAS.DELETE(id), {
         method: 'DELETE'
       })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
     } catch (error) {
       console.error('Error deleting convenio:', error)
       throw error
@@ -272,6 +392,38 @@ class ConveniosService {
       ...baseFilters,
       limit,
       skip: (page - 1) * limit
+    }
+  }
+
+  // Método de diagnóstico completo
+  async runDiagnostics(): Promise<void> {
+    console.log('🔍 Ejecutando diagnósticos...')
+    
+    // 1. Verificar token
+    const token = AuthService.getToken()
+    console.log('🔐 Token presente:', !!token)
+    if (token) {
+      console.log('🔐 Token (primeros 20 chars):', token.substring(0, 20) + '...')
+    }
+    
+    // 2. Verificar configuración
+    console.log('⚙️ Auth URL:', API_CONFIG.AUTH_BASE_URL || API_CONFIG.BASE_URL)
+    console.log('⚙️ Convocatorias URL:', API_CONFIG.CONVOCATORIAS_BASE_URL)
+    
+    // 3. Verificar servicio de convocatorias
+    console.log('🌐 Verificando servicio de convocatorias...')
+    const serviceCheck = await this.checkConvocatoriasService()
+    console.log('🌐 Estado del servicio:', serviceCheck)
+    
+    // 4. Intentar una petición simple
+    if (serviceCheck.status === 'success') {
+      console.log('📋 Intentando obtener convocatorias...')
+      try {
+        const result = await this.fetchConvenios({ limit: 1 })
+        console.log('✅ Convocatorias obtenidas exitosamente:', result.total, 'total')
+      } catch (error) {
+        console.log('❌ Error obteniendo convocatorias:', error)
+      }
     }
   }
 }

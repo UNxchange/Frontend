@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 // Organismos
-import Header from '../organisms/Header'
+import NavigationBar from '../organisms/NavigationBar'
 
 // Moléculas
 import SearchBar from '../molecules/SearchBar'
@@ -20,6 +20,7 @@ import conveniosService, { UniversidadApi, ConveniosResponse } from '../services
 // Estilos
 import '../atoms/navbar.css'
 import '../atoms/convenios.css'
+import '../atoms/navigation.css'
 
 interface Filters {
   q: string
@@ -218,10 +219,6 @@ const Convenios: React.FC = () => {
     setSelectedUniversity(null)
   }
 
-  const handleLogout = () => {
-    navigate('/login')
-  }
-
   // Cerrar dropdown de filtros al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -239,8 +236,8 @@ const Convenios: React.FC = () => {
 
   return (
     <div>
-      {/* Header */}
-      <Header onLogout={handleLogout} />
+      {/* Navigation Bar */}
+      <NavigationBar />
 
       {/* Search and Filters */}
       <SearchBar

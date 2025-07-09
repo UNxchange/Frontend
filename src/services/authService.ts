@@ -102,6 +102,46 @@ export class AuthService {
     }
   }
 
+  static async getCurrentUser(): Promise<User> {
+    try {
+      const token = this.getToken()
+      if (!token) {
+        throw new Error('No authentication token found')
+      }
+
+      // Decodificar el token para obtener información del usuario
+      const payload = this.decodeToken(token)
+      
+      // Si el payload tiene información del usuario, usarla
+      if (payload && payload.sub) {
+        return await this.getUserByEmail(payload.sub)
+      }
+      
+      // Si no, hacer una llamada a la API para obtener el usuario actual
+      const data = await HttpClient.get<User>(API_CONFIG.ENDPOINTS.AUTH.ME)
+      return data
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error
+      }
+      throw new Error('Network error - Please check your connection')
+    }
+  }
+
+  private static decodeToken(token: string): any {
+    try {
+      const base64Url = token.split('.')[1]
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      }).join(''))
+      return JSON.parse(jsonPayload)
+    } catch (error) {
+      console.error('Error decoding token:', error)
+      return null
+    }
+  }
+
   static saveToken(token: string): void {
     localStorage.setItem(APP_CONFIG.TOKEN_KEY, token)
   }
