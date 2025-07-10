@@ -20,9 +20,9 @@ function App() {
           <Route 
             path="/dashboard" 
             element={
-              <ProtectedRoute requiredRoles={['administrador', 'coordinator', 'profesional']}>
+              /*<ProtectedRoute requiredRoles={['administrador', 'coordinator', 'profesional']}>*/
                 <Dashboard />
-              </ProtectedRoute>
+              /*</ProtectedRoute>*/
             } 
           />
           
