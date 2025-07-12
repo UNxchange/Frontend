@@ -5,15 +5,17 @@ import './atoms/globals.css'
 // Importar páginas
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
+import DashboardStudent from './pages/DashboardStudent'
 import Convenios from './pages/Convenios'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import RootRedirect from './components/RootRedirect'
 
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
           
           {/* Dashboard - Solo para administrador, coordinator, profesional */}
@@ -22,6 +24,16 @@ function App() {
             element={
               <ProtectedRoute requiredRoles={['administrador', 'coordinator', 'profesional']}>
                 <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Dashboard Student - Solo para estudiantes */}
+          <Route 
+            path="/dashboard/estudiante" 
+            element={
+              <ProtectedRoute requiredRoles={['estudiante']}>
+                <DashboardStudent />
               </ProtectedRoute>
             } 
           />

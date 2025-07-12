@@ -11,6 +11,13 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
       roles: ['administrador', 'coordinator', 'profesional']
     },
     {
+      id: 'dashboard-student',
+      label: 'Mi Tablero',
+      path: '/dashboard/estudiante',
+      icon: 'chart-bar',
+      roles: ['estudiante']
+    },
+    {
       id: 'convenios',
       label: 'Convenios',
       path: '/convenios',

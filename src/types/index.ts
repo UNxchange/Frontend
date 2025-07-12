@@ -61,6 +61,22 @@ export interface Country {
     flag: string;
 }
 
+export interface ApplicationDetails {
+    id: string;
+    subscriptionYear: string;
+    country: string;
+    institution: string;
+    agreementType: string;
+    validity: string;
+    state: string;
+    subscriptionLevel: string;
+    languages: string[];
+    dreLink: string;
+    agreementLink: string;
+    properties: string;
+    internationalLink: string;
+}
+
 // Tipos para eventos del DOM
 export type EventHandler<T extends Event = Event> = (event: T) => void;
 

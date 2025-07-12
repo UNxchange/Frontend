@@ -18,6 +18,18 @@ const Login: React.FC = () => {
   // Obtener la ubicación desde donde se redirigió al login
   const from = (location.state as any)?.from?.pathname || APP_CONFIG.DEFAULT_REDIRECT
 
+  // Función para determinar redirección basada en rol
+  const getRedirectPathByRole = (userRole: string): string => {
+    const roleRedirects = {
+      'estudiante': '/dashboard/estudiante', // Estudiantes van a su dashboard específico
+      'profesional': '/dashboard',           // Profesionales al dashboard
+      'coordinator': '/analytics',           // Coordinadores a analytics
+      'administrador': '/dashboard',         // Administradores al dashboard
+    }
+    
+    return roleRedirects[userRole as keyof typeof roleRedirects] || '/dashboard'
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -37,8 +49,17 @@ const Login: React.FC = () => {
       
       console.log('Login successful:', response)
       
-      // Redirigir a la página original o al dashboard
-      navigate(from, { replace: true })
+      // Obtener información del usuario para determinar redirección
+      const userData = await AuthService.getCurrentUser()
+      
+      // Determinar redirección basada en rol (si from es la página por defecto)
+      let redirectPath = from
+      if (from === APP_CONFIG.DEFAULT_REDIRECT) {
+        redirectPath = getRedirectPathByRole(userData.role)
+      }
+      
+      // Redirigir a la página determinada
+      navigate(redirectPath, { replace: true })
     } catch (error) {
       console.error('Login error:', error)
       
