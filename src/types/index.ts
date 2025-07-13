@@ -77,6 +77,27 @@ export interface ApplicationDetails {
     internationalLink: string;
 }
 
+// Tipos para creación de convocatorias
+export interface ConvocatoriaCreate {
+    subscriptionYear: string;
+    country: string;
+    institution: string;
+    agreementType: string;
+    validity: string;
+    state: string;
+    subscriptionLevel: string;
+    languages: string[];
+    dreLink?: string;
+    agreementLink?: string;
+    Props?: string; // Note: backend expects "Props" not "properties"
+    internationalLink?: string;
+}
+
+// Tipo para respuesta de creación de convocatoria
+export interface ConvocatoriaResponse extends ConvocatoriaCreate {
+    id: string;
+}
+
 // Tipos para eventos del DOM
 export type EventHandler<T extends Event = Event> = (event: T) => void;
 

@@ -21,10 +21,10 @@ const Login: React.FC = () => {
   // Función para determinar redirección basada en rol
   const getRedirectPathByRole = (userRole: string): string => {
     const roleRedirects = {
-      'estudiante': '/dashboard/estudiante', // Estudiantes van a su dashboard específico
-      'profesional': '/dashboard',           // Profesionales al dashboard
-      'coordinator': '/analytics',           // Coordinadores a analytics
-      'administrador': '/dashboard',         // Administradores al dashboard
+      'estudiante': '/dashboard/estudiante',    // Estudiantes van a su dashboard específico
+      'profesional': '/dashboard/profesional', // Profesionales a su dashboard específico
+      'coordinator': '/analytics',              // Coordinadores a analytics
+      'administrador': '/dashboard',            // Administradores al dashboard
     }
     
     return roleRedirects[userRole as keyof typeof roleRedirects] || '/dashboard'

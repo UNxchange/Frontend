@@ -8,7 +8,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
       label: 'Dashboard',
       path: '/dashboard',
       icon: 'chart-bar',
-      roles: ['administrador', 'coordinator', 'profesional']
+      roles: ['administrador', 'coordinator']
     },
     {
       id: 'dashboard-student',
@@ -16,6 +16,13 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
       path: '/dashboard/estudiante',
       icon: 'chart-bar',
       roles: ['estudiante']
+    },
+    {
+      id: 'dashboard-profesional',
+      label: 'Gestión de Convocatorias',
+      path: '/dashboard/profesional',
+      icon: 'academic-cap',
+      roles: ['profesional']
     },
     {
       id: 'convenios',

@@ -52,3 +52,22 @@ Thumbs.db
 # Temporary folders
 tmp/
 temp/
+
+# Python cache files (for integration tests)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Integration test reports and screenshots
+integration-tests/reports/
+integration-tests/screenshots/
+integration-tests/__pycache__/
+integration-tests/page_objects/__pycache__/
+
+# Test artifacts
+*.pdf
+*.png
+
+# Convocatorias directory (external repo)
+convocatorias/

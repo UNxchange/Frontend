@@ -6,6 +6,7 @@ import './atoms/globals.css'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import DashboardStudent from './pages/DashboardStudent'
+import DashboardProfesional from './pages/DashboardProfesional'
 import Convenios from './pages/Convenios'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import RootRedirect from './components/RootRedirect'
@@ -34,6 +35,16 @@ function App() {
             element={
               <ProtectedRoute requiredRoles={['estudiante']}>
                 <DashboardStudent />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Dashboard Profesional - Solo para profesionales */}
+          <Route 
+            path="/dashboard/profesional" 
+            element={
+              <ProtectedRoute requiredRoles={['profesional']}>
+                <DashboardProfesional />
               </ProtectedRoute>
             } 
           />
