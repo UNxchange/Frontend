@@ -12,8 +12,10 @@ class CustomChromeConfig(TestConfig):
     # Si tienes un .bat que lanza Chrome, especifica la ruta del ejecutable de Chrome
     CHROME_EXECUTABLE = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
     
-    # Directorio de datos del usuario personalizado para pruebas
-    CHROME_USER_DATA_DIR = r"C:\Users\ABC PRODUCCIONES\AppData\Local\Google\Chrome\User Data\TestProfile"
+    # Directorio de datos del usuario personalizado para pruebas (temporal y limpio)
+    import tempfile
+    import os
+    CHROME_USER_DATA_DIR = os.path.join(tempfile.gettempdir(), "ChromeTestProfile_" + str(os.getpid()))
     
     # Puerto para debugging remoto (debe ser único)
     CHROME_DEBUG_PORT = 9222
@@ -42,7 +44,7 @@ class CustomChromeConfig(TestConfig):
         "--no-report-upload",              # No subir reportes
         "--disable-dev-shm-usage",         # Para contenedores Docker/CI
         "--no-sandbox",                    # Para contenedores Docker/CI
-        # === NUEVAS OPCIONES PARA DESHABILITAR GESTOR DE CONTRASEÑAS ===
+        # === OPCIONES PARA DESHABILITAR AUTOCOMPLETADO Y GESTIÓN DE CONTRASEÑAS ===
         "--disable-password-manager",      # Deshabilitar gestor de contraseñas
         "--disable-save-password-bubble",  # Deshabilitar popup de guardar contraseña
         "--disable-password-manager-reauthentication", # Deshabilitar reautenticación
@@ -51,6 +53,13 @@ class CustomChromeConfig(TestConfig):
         "--disable-features=InsecurePasswordInput", # Deshabilitar advertencias de contraseñas inseguras
         "--disable-features=PasswordImport", # Deshabilitar importación de contraseñas
         "--disable-features=PasswordExport", # Deshabilitar exportación de contraseñas
+        "--disable-features=AutofillServerCommunication", # Deshabilitar comunicación de autocompletado
+        "--disable-features=AutofillAddressAndCreditCard", # Deshabilitar autocompletado de direcciones
+        "--disable-features=Autofill",     # Deshabilitar autocompletado general
+        "--disable-autofill-keyboard-accessory-view", # Deshabilitar vista de teclado de autocompletado
+        "--disable-single-click-autofill", # Deshabilitar autocompletado de un clic
+        "--disable-password-generation",   # Deshabilitar generación de contraseñas
+        "--disable-form-controls-refresh", # Deshabilitar actualización de controles de formulario
         "--disable-infobars",              # Deshabilitar barras de información
         "--disable-notifications",         # Deshabilitar notificaciones
         "--disable-component-extensions-with-background-pages", # Deshabilitar extensiones de componentes
@@ -60,7 +69,7 @@ class CustomChromeConfig(TestConfig):
     STEALTH_MODE = True
     
     # URLs corregidas para tu configuración
-    FRONTEND_URL = "http://localhost:3001"  # Puerto del frontend principal
+    FRONTEND_URL = "http://localhost:3000"  # Puerto del frontend principal
     
     # Credenciales actualizadas
     TEST_USER_EMAIL = "profesional@gmail.com"
@@ -71,7 +80,7 @@ def get_chrome_options_like_disable_cors_bat():
     Retorna las opciones de Chrome que replican tu disableCORS.bat
     
     Si tu disableCORS.bat contiene algo como:
-    "C:\Program Files\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir="C:\temp\chrome"
+    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" --disable-web-security --user-data-dir="C:\\temp\\chrome"
     
     Esta función replica esas mismas opciones
     """
