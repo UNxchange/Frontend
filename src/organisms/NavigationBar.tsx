@@ -52,6 +52,20 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) => {
     return location.pathname === path
   }
 
+  // Función para obtener la ruta del dashboard según el rol
+  const getDashboardRoute = () => {
+    if (!user) return '/dashboard'
+    
+    switch (user.role) {
+      case 'profesional':
+        return '/dashboard/profesional'
+      case 'estudiante':
+        return '/dashboard/estudiante'
+      default:
+        return '/dashboard'
+    }
+  }
+
   const renderMenuItem = (item: MenuItem) => (
     <Link
       key={item.id}
@@ -90,7 +104,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) => {
     <nav className={`navbar ${className}`}>
       <div className="navbar-container">
         {/* Logo y marca */}
-        <Link to="/dashboard" className="navbar-brand">
+        <Link to={getDashboardRoute()} className="navbar-brand">
           <img 
             src="https://cdiac.manizales.unal.edu.co/imagenes/LogosMini/un.png" 
             alt="UN Intercambio" 

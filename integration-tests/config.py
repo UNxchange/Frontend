@@ -8,7 +8,7 @@ class TestConfig:
     """Configuración centralizada para las pruebas"""
     
     # URLs de los servicios
-    FRONTEND_URL: str = "http://localhost:3001"  # Puerto del frontend principal
+    FRONTEND_URL: str = "http://localhost:3000"  # Puerto del frontend principal
     BACKEND_URL: str = "http://localhost:8000"
     CONVOCATORIAS_ENDPOINT: str = f"{BACKEND_URL}/convocatorias/"
     

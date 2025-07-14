@@ -1,6 +1,12 @@
 """
 Configuración de pytest y fixtures para las pruebas de integración
 """
+import warnings
+# Silenciar warnings de urllib3 para WebDriverManager
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 import pytest
 import os
 import requests
