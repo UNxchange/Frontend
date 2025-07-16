@@ -39,7 +39,7 @@ export const ConvocatoriasService = {
             console.log('Token disponible:', token ? 'SÍ' : 'NO');
             console.log('Datos a enviar:', convocatoriaData);
             
-            const response = await apiClient.request<ConvocatoriaResponse>('/convocatorias/', {
+            const response = await apiClient.request<ConvocatoriaResponse>('convocatorias/', {
                 method: 'POST',
                 body: JSON.stringify(convocatoriaData),
                 requiresAuth: true,
