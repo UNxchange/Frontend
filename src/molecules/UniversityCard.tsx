@@ -3,7 +3,7 @@ import Badge from '../atoms/Badge'
 import Button from '../atoms/Button'
 
 export interface Universidad {
-  id: number | string
+  id?: number | string
   institution: string
   country: string
   city?: string

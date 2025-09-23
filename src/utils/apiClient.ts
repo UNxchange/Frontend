@@ -71,7 +71,16 @@ export class ApiClient {
     endpoint: string,
     options: RequestInit & RequestConfig = {}
   ): Promise<T> {
-    const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}${endpoint}`;
+    // Construir URL correctamente con barras diagonales
+    let url: string;
+    if (endpoint.startsWith('http')) {
+      url = endpoint;
+    } else {
+      // Asegurar que hay exactamente una barra diagonal entre baseURL y endpoint
+      const baseURL = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL;
+      const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+      url = `${baseURL}${cleanEndpoint}`;
+    }
     
     const config: RequestInit = {
       ...options,

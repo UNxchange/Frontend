@@ -7,8 +7,10 @@ Este documento describe la integración del frontend con la API de autenticació
 ### URL de la API
 La aplicación está configurada para usar la API en:
 ```
-https://unxchange-auth-backend-9208adf2339d.herokuapp.com
+http://localhost:8080
 ```
+
+> **Nota**: La URL se configura automáticamente desde las variables de entorno usando `VITE_AUTH_BASE_URL`
 
 ### Endpoints disponibles
 
