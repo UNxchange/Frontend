@@ -88,11 +88,11 @@ const UniversityCard: React.FC<UniversityCardProps> = ({
       <div className={`card-header ${isNoVigente ? 'no-vigente' : ''}`}>
         <h2 className="card-title">
           <img 
-            src={`/src/assets/flags/${universidad.country}.png`} 
+            src={`/assets/flags/${universidad.country}.png`} 
             alt={`${universidad.country} flag`} 
             className="flag"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/src/assets/flags/Internacional.png'
+              (e.target as HTMLImageElement).src = '/assets/flags/Internacional.png'
             }}
           />
           {universidad.institution}
@@ -125,12 +125,12 @@ const UniversityCard: React.FC<UniversityCardProps> = ({
             <strong>PAÍS</strong>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <img 
-                src={`/src/assets/flags/${universidad.country}.png`} 
+                src={`/assets/flags/${universidad.country}.png`} 
                 alt={`${universidad.country} flag`} 
                 className="flag"
                 style={{ width: '20px', height: '15px' }}
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/src/assets/flags/Internacional.png'
+                  (e.target as HTMLImageElement).src = '/assets/flags/Internacional.png'
                 }}
               />
               {universidad.country}
