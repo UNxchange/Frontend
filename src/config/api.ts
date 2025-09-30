@@ -1,10 +1,16 @@
 export const API_CONFIG = {
-  // Auth service - Using environment variable
-  AUTH_BASE_URL: (import.meta as any).env.VITE_AUTH_BASE_URL || 'http://localhost:8080',
-  // Convocatorias service - Using environment variable
-  CONVOCATORIAS_BASE_URL: (import.meta as any).env.VITE_CONVOCATORIAS_BASE_URL || 'http://localhost:8008',
-  // Legacy BASE_URL for auth compatibility - Updated to use environment variable
-  BASE_URL: (import.meta as any).env.VITE_AUTH_BASE_URL || 'http://localhost:8080',
+  // Auth service - Using environment variable with proxy fallback for containers
+  AUTH_BASE_URL: (import.meta as any).env.VITE_AUTH_BASE_URL || 
+                 (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+                  'http://localhost:3000' : 'http://localhost:8000'),
+  // Convocatorias service - Using environment variable with proxy fallback for containers  
+  CONVOCATORIAS_BASE_URL: (import.meta as any).env.VITE_CONVOCATORIAS_BASE_URL || 
+                          (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+                           'http://localhost:3000' : 'http://localhost:8008'),
+  // Legacy BASE_URL for auth compatibility
+  BASE_URL: (import.meta as any).env.VITE_AUTH_BASE_URL || 
+           (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+            'http://localhost:3000' : 'http://localhost:8000'),
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/api/v1/auth/login',
