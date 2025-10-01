@@ -99,13 +99,6 @@ const CreateConvocatoriaForm: React.FC<CreateConvocatoriaFormProps> = ({
       return
     }
 
-    // Debug: Verificar autenticación antes de enviar
-    const token = localStorage.getItem('access_token');
-    console.log('Estado de autenticación:', {
-      tokenExists: !!token,
-      tokenLength: token?.length || 0
-    });
-
     setIsLoading(true)
 
     try {

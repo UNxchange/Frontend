@@ -3,7 +3,7 @@ import { ApplicationDetails, ConvocatoriaCreate, ConvocatoriaResponse } from '..
 import { ApiClient } from '../utils/apiClient';
 
 // Configuración del API
-const CONVOCATORIAS_BASE_URL = (import.meta as any).env.VITE_CONVOCATORIAS_BASE_URL || 'http://localhost:8000';
+const CONVOCATORIAS_BASE_URL = (import.meta as any).env.VITE_CONVOCATORIAS_BASE_URL || 'http://localhost:8008';
 const apiClient = new ApiClient(CONVOCATORIAS_BASE_URL);
 
 export const ConvocatoriasService = {
@@ -34,12 +34,9 @@ export const ConvocatoriasService = {
     // Crear nueva convocatoria
     async createConvocatoria(convocatoriaData: ConvocatoriaCreate): Promise<ConvocatoriaResponse> {
         try {
-            // Debug: Verificar token antes de enviar
-            const token = localStorage.getItem('access_token');
-            console.log('Token disponible:', token ? 'SÍ' : 'NO');
-            console.log('Datos a enviar:', convocatoriaData);
+            console.log('Creando convocatoria...', convocatoriaData);
             
-            const response = await apiClient.request<ConvocatoriaResponse>('convocatorias/', {
+            const response = await apiClient.request<ConvocatoriaResponse>('/convocatorias', {
                 method: 'POST',
                 body: JSON.stringify(convocatoriaData),
                 requiresAuth: true,
@@ -53,7 +50,6 @@ export const ConvocatoriasService = {
             
             // Manejo específico de errores
             if (error instanceof Error) {
-                // Si el error contiene información de respuesta HTTP
                 const errorMessage = error.message;
                 
                 if (errorMessage.includes('403') || errorMessage.includes('Forbidden')) {

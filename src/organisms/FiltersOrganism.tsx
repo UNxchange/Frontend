@@ -15,6 +15,8 @@ interface FiltersOrganismProps {
     states: string[]
     agreementTypes: string[]
     subscriptionLevels: string[]
+    validityOptions: string[]
+    subscriptionYears: string[]
   }
   currentFilters: {
     country: string
@@ -22,6 +24,8 @@ interface FiltersOrganismProps {
     state: string
     agreement_type: string
     subscription_level: string
+    validity: string
+    subscription_year: string
   }
 }
 
@@ -53,17 +57,19 @@ const FiltersOrganism: React.FC<FiltersOrganismProps> = ({
             <i className="fas fa-filter text-gray-600"></i>
           </button>
           
-          <FilterDropdown
-            isOpen={showFilterDropdown}
-            onToggle={onFilterToggle}
-            countries={filterOptions.countries}
-            languages={filterOptions.languages}
-            states={filterOptions.states}
-            agreementTypes={filterOptions.agreementTypes}
-            subscriptionLevels={filterOptions.subscriptionLevels}
-            filters={currentFilters}
-            onFilterChange={onFilterChange}
-          />
+          {showFilterDropdown && (
+            <FilterDropdown
+              countries={filterOptions.countries}
+              languages={filterOptions.languages}
+              states={filterOptions.states}
+              agreementTypes={filterOptions.agreementTypes}
+              subscriptionLevels={filterOptions.subscriptionLevels}
+              validityOptions={filterOptions.validityOptions}
+              subscriptionYears={filterOptions.subscriptionYears}
+              filters={currentFilters}
+              onFilterChange={onFilterChange}
+            />
+          )}
         </div>
       </div>
     </div>

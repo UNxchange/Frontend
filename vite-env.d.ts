@@ -3,7 +3,6 @@
 interface ImportMetaEnv {
   readonly VITE_AUTH_BASE_URL: string
   readonly VITE_CONVOCATORIAS_BASE_URL: string
-  readonly VITE_CONVENIOS_BASE_URL: string
   readonly VITE_CONVOCATORIAS_API_URL: string
   readonly VITE_TOKEN_KEY: string
   readonly VITE_DEFAULT_REDIRECT: string

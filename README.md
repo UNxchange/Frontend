@@ -32,12 +32,12 @@ Asegúrate de tener instalado:
 
    ```env
    # API Endpoints
-   VITE_AUTH_BASE_URL=https://unxchange-auth-backend-9208adf2339d.herokuapp.com
-   VITE_CONVOCATORIAS_BASE_URL=http://127.0.0.1:8000
-   VITE_CONVENIOS_BASE_URL=https://unxchange-auth-backend-9208adf2339d.herokuapp.com
+   VITE_AUTH_BASE_URL=http://localhost:8080
+   VITE_CONVOCATORIAS_BASE_URL=http://localhost:8008
+   VITE_CONVENIOS_BASE_URL=http://localhost:8080
 
    # API Specific Endpoints
-   VITE_CONVOCATORIAS_API_URL=http://localhost:8000/convocatorias/
+   VITE_CONVOCATORIAS_API_URL=http://localhost:8008/convocatorias/
 
    # App Configuration
    VITE_TOKEN_KEY=access_token
@@ -51,7 +51,7 @@ Asegúrate de tener instalado:
    npm run dev
    ```
 
-5. **Abre tu navegador** y ve a: `http://localhost:3001`
+5. **Abre tu navegador** y ve a: `http://localhost:3000`
 
 ¡Listo! El proyecto debería estar ejecutándose correctamente.
 
@@ -221,15 +221,15 @@ python -m pytest -v -s --html=reports/full_test_report.html
 
 Antes de ejecutar las pruebas, asegúrate de que estén ejecutándose:
 
-1. **Frontend** en `http://localhost:3001`:
+1. **Frontend** en `http://localhost:3000`:
    ```bash
    npm run dev
    ```
 
-2. **Backend** en `http://localhost:8000`:
+2. **Backend** en `http://localhost:8008`:
    ```bash
    # Desde el directorio del backend
-   uvicorn main:app --reload --port 8000
+   uvicorn main:app --reload --port 8008
    ```
 
 ### Credenciales de Prueba

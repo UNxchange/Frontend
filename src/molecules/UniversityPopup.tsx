@@ -101,11 +101,11 @@ const UniversityPopup: React.FC<UniversityPopupProps> = ({
               
               <div className="flex-shrink-0">
                 <img 
-                  src={`/src/assets/flags/${universidad.country}.png`} 
+                  src={`/assets/flags/${universidad.country}.png`} 
                   alt={`${universidad.country} flag`} 
                   className="university-popup-flag"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/src/assets/flags/Internacional.png'
+                    (e.target as HTMLImageElement).src = '/assets/flags/Internacional.png'
                   }}
                 />
               </div>

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { API_CONFIG } from '../config/api';
 
 const getConvocatorias = async () => {
   const config = {
@@ -9,10 +10,9 @@ const getConvocatorias = async () => {
   };
 
   try {
-    const apiUrl = (import.meta as any).env.VITE_CONVOCATORIAS_API_URL;
-    if (!apiUrl) {
-      throw new Error('CONVOCATORIAS API URL is not defined');
-    }
+    // Usar la configuración centralizada en lugar de variable de entorno directa
+    const apiUrl = `${API_CONFIG.CONVOCATORIAS_BASE_URL}${API_CONFIG.ENDPOINTS.CONVOCATORIAS.LIST}`;
+    console.log('Fetching convocatorias from:', apiUrl);
     
     const response = await axios.get(apiUrl, config);
     console.log('Convocatorias Response:', response.data);

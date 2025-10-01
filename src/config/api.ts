@@ -1,10 +1,16 @@
 export const API_CONFIG = {
-  // Auth service on Heroku
-  AUTH_BASE_URL: 'https://unxchange-auth-backend-9208adf2339d.herokuapp.com',
-  // Convocatorias service local
-  CONVOCATORIAS_BASE_URL: 'http://127.0.0.1:8000',
+  // Auth service - Using environment variable with proxy fallback for containers
+  AUTH_BASE_URL: (import.meta as any).env.VITE_AUTH_BASE_URL || 
+                 (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+                  'http://localhost:3000' : 'http://localhost:8000'),
+  // Convocatorias service - Using environment variable with proxy fallback for containers  
+  CONVOCATORIAS_BASE_URL: (import.meta as any).env.VITE_CONVOCATORIAS_BASE_URL || 
+                          (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+                           'http://localhost:3000' : 'http://localhost:8008'),
   // Legacy BASE_URL for auth compatibility
-  BASE_URL: 'https://unxchange-auth-backend-9208adf2339d.herokuapp.com',
+  BASE_URL: (import.meta as any).env.VITE_AUTH_BASE_URL || 
+           (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+            'http://localhost:3000' : 'http://localhost:8000'),
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/api/v1/auth/login',
@@ -31,7 +37,7 @@ export const API_CONFIG = {
 }
 
 export const APP_CONFIG = {
-  TOKEN_KEY: 'access_token',
-  DEFAULT_REDIRECT: '/dashboard',
-  LOGIN_PATH: '/login'
+  TOKEN_KEY: (import.meta as any).env.VITE_TOKEN_KEY || 'access_token',
+  DEFAULT_REDIRECT: (import.meta as any).env.VITE_DEFAULT_REDIRECT || '/dashboard',
+  LOGIN_PATH: (import.meta as any).env.VITE_LOGIN_PATH || '/login'
 }

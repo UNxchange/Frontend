@@ -1,5 +1,6 @@
 import { HttpClient } from '../utils/httpClient'
 import { API_CONFIG, APP_CONFIG } from '../config/api'
+import { User } from '../types'
 
 export interface LoginRequest {
   username: string
@@ -14,13 +15,6 @@ export interface RegisterRequest {
   email: string
   role: string
   password: string
-}
-
-export interface User {
-  id: string
-  name: string
-  email: string
-  role: string
 }
 
 export interface LoginResponse {
