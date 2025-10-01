@@ -174,6 +174,14 @@ server {
         proxy_buffering off;
     }
     
+    # Assets estáticos del frontend (importante para flags, fonts, etc)
+    location /assets/ {
+        proxy_pass http://unxchange-frontend:8080/assets/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_cache_valid 200 1d;
+        add_header Cache-Control "public, immutable";
+    }
     # Archivos estáticos con cache apropiado
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
         expires 1y;
