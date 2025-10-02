@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { getNavigationForRole } from '../config/navigation'
 import { MenuItem } from '../types'
 import Button from '../atoms/Button'
+import NotificationBell from '../components/NotificationBell'
 import '../atoms/navbar.css'
 
 interface NavigationBarProps {
@@ -120,6 +121,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ className = '' }) => {
 
         {/* Acciones del usuario */}
         <div className="navbar-actions">
+          {/* Campana de notificaciones */}
+          <NotificationBell />
+
           {/* Información del usuario */}
           <div className="user-info">
             <span className="user-name">{user?.name}</span>

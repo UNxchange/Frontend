@@ -2,6 +2,7 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Button from '../atoms/Button'
 import { useAuth } from '../hooks/useAuth'
+import NotificationBell from '../components/NotificationBell'
 
 const Header: React.FC = () => {
   const { logout, isAuthenticated } = useAuth()
@@ -50,13 +51,16 @@ const Header: React.FC = () => {
           
           <li className="ml-auto">
             {isAuthenticated ? (
-              <Button 
-                onClick={handleLogout}
-                variant="danger"
-                className="px-4 py-2"
-              >
-                Log Out
-              </Button>
+              <>
+                <NotificationBell />
+                <Button 
+                  onClick={handleLogout}
+                  variant="danger"
+                  className="px-4 py-2 ml-4"
+                >
+                  Log Out
+                </Button>
+              </>
             ) : (
               <Link to="/login">
                 <Button 

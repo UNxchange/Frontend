@@ -7,6 +7,10 @@ export const API_CONFIG = {
   CONVOCATORIAS_BASE_URL: (import.meta as any).env.VITE_CONVOCATORIAS_BASE_URL || 
                           (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
                            'http://localhost:3000' : 'http://localhost:8008'),
+  // Notifications service - Using environment variable with proxy fallback for containers
+  NOTIFICATIONS_BASE_URL: (import.meta as any).env.VITE_NOTIFICATIONS_BASE_URL || 
+                          (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
+                           'http://localhost:3000' : 'http://localhost:8001'),
   // Legacy BASE_URL for auth compatibility
   BASE_URL: (import.meta as any).env.VITE_AUTH_BASE_URL || 
            (window.location.hostname === 'localhost' && window.location.port === '3000' ? 
@@ -32,6 +36,9 @@ export const API_CONFIG = {
       CREATE: '/convocatorias',
       UPDATE: (id: string | number) => `/convocatorias/${id}`,
       DELETE: (id: string | number) => `/convocatorias/${id}`
+    },
+    NOTIFICATIONS: {
+      GRAPHQL: '/api/v1/notification/graphql'
     }
   }
 }

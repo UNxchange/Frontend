@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import DashboardStudent from './pages/DashboardStudent'
 import DashboardProfesional from './pages/DashboardProfesional'
 import Convenios from './pages/Convenios'
+import Notifications from './pages/Notifications'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import RootRedirect from './components/RootRedirect'
 
@@ -110,7 +111,7 @@ function App() {
             path="/notifications" 
             element={
               <ProtectedRoute>
-                <div>Página de Notificaciones</div>
+                <Notifications />
               </ProtectedRoute>
             } 
           />
