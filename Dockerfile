@@ -128,7 +128,8 @@ types {
 }
 EOF
 
-# Configuración de nginx con proxies para APIs
+# Configuración simplificada de nginx - solo sirve archivos estáticos
+# El nginx-proxy principal maneja todo el routing de APIs
 RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
 server {
     listen 8080;
@@ -143,37 +144,6 @@ server {
         add_header Content-Type text/plain;
     }
     
-    # API proxy para desarrollo - redirigir a servicios backend
-    location /api/v1/auth/ {
-        proxy_pass http://unxchange-auth-service:8000/api/v1/auth/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
-        proxy_buffering off;
-    }
-    
-    location /convocatorias {
-        proxy_pass http://unxchange-convocatorias-service:8002;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
-        proxy_buffering off;
-    }
-    
-    location /api/v1/notification/ {
-        proxy_pass http://unxchange-notifications-service:8001/api/v1/notification/;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_redirect off;
-        proxy_buffering off;
-    }
-    
     # Assets estáticos del frontend (importante para flags, fonts, etc)
     location /assets/ {
         try_files $uri $uri/ =404;
@@ -181,6 +151,7 @@ server {
         add_header Cache-Control "public, immutable";
         add_header Access-Control-Allow-Origin "*";
     }
+    
     # Archivos estáticos con cache apropiado
     location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
         expires 1y;
