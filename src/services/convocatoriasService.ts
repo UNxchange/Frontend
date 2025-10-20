@@ -1,10 +1,10 @@
 import getConvocatorias from './getConvocatorias';
 import { ApplicationDetails, ConvocatoriaCreate, ConvocatoriaResponse } from '../types';
 import { ApiClient } from '../utils/apiClient';
+import { API_CONFIG } from '../config/api';
 
-// Configuración del API
-const CONVOCATORIAS_BASE_URL = (import.meta as any).env.VITE_CONVOCATORIAS_BASE_URL || 'http://localhost:8008';
-const apiClient = new ApiClient(CONVOCATORIAS_BASE_URL);
+// Usar API Gateway (v2.0)
+const apiClient = new ApiClient(API_CONFIG.API_GATEWAY_URL);
 
 export const ConvocatoriasService = {
     async getConvocatorias(): Promise<ApplicationDetails[]> {
@@ -31,17 +31,20 @@ export const ConvocatoriasService = {
         return await this.getConvocatorias();
     },
 
-    // Crear nueva convocatoria
+    // Crear nueva convocatoria (usando el nuevo path /api/v1/convocatorias)
     async createConvocatoria(convocatoriaData: ConvocatoriaCreate): Promise<ConvocatoriaResponse> {
         try {
             console.log('Creando convocatoria...', convocatoriaData);
             
-            const response = await apiClient.request<ConvocatoriaResponse>('/convocatorias', {
-                method: 'POST',
-                body: JSON.stringify(convocatoriaData),
-                requiresAuth: true,
-                withCredentials: true
-            });
+            const response = await apiClient.request<ConvocatoriaResponse>(
+                API_CONFIG.ENDPOINTS.CONVOCATORIAS.CREATE,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(convocatoriaData),
+                    requiresAuth: true,
+                    withCredentials: true
+                }
+            );
             
             console.log('Convocatoria creada exitosamente:', response);
             return response;

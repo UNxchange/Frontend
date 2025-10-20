@@ -1,5 +1,6 @@
 import React from 'react'
 import Badge from '../atoms/Badge'
+import ReviewsList from '../components/ReviewsList'
 import './UniversityPopup.css'
 
 interface Universidad {
@@ -281,6 +282,17 @@ const UniversityPopup: React.FC<UniversityPopupProps> = ({
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="university-popup-section">
+              <h3 className="university-popup-section-title">
+                Reseñas y Experiencias
+              </h3>
+              <ReviewsList 
+                convocatoriaId={String(universidad.id)} 
+                showCreateForm={true}
+              />
             </div>
           </div>
         </div>

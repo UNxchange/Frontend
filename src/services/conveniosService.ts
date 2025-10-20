@@ -162,7 +162,7 @@ class ConvocatoriasHttpClient {
 class ConveniosService {
   // Método de diagnóstico para verificar la conectividad
   async checkConvocatoriasService(): Promise<{ status: string, url: string, message: string }> {
-    const url = `${API_CONFIG.CONVOCATORIAS_BASE_URL}/convocatorias/?limit=1`
+    const url = `${API_CONFIG.API_GATEWAY_URL}${API_CONFIG.ENDPOINTS.CONVOCATORIAS.LIST}?limit=1`
     
     try {
       const response = await fetch(url, {

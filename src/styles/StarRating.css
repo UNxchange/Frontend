@@ -1,0 +1,71 @@
+/* ⭐ Estilos para el componente StarRating */
+
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.star-rating__stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.star-rating__star {
+  background: none;
+  border: none;
+  cursor: default;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.star-rating__star--interactive {
+  cursor: pointer;
+}
+
+.star-rating__star--interactive:hover {
+  transform: scale(1.1);
+}
+
+.star-rating__star--filled {
+  color: #FFD700; /* Dorado */
+}
+
+.star-rating__star--empty {
+  color: #E0E0E0; /* Gris claro */
+}
+
+/* Tamaños */
+.star-rating--small .star-rating__star {
+  font-size: 1rem;
+}
+
+.star-rating--medium .star-rating__star {
+  font-size: 1.5rem;
+}
+
+.star-rating--large .star-rating__star {
+  font-size: 2rem;
+}
+
+.star-rating__label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Hover effect para estrellas interactivas */
+.star-rating__star--interactive:focus {
+  outline: 2px solid #4A90E2;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Deshabilitar animación en modo solo lectura */
+.star-rating__star:disabled {
+  cursor: default;
+  transform: none !important;
+}

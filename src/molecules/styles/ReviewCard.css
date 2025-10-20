@@ -1,0 +1,171 @@
+/* ⭐ Estilos para ReviewCard */
+
+.review-card {
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s ease;
+}
+
+.review-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.review-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.review-card__author-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.review-card__author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.review-card__author-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.review-card__author-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.review-card__date {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.review-card__edited {
+  font-style: italic;
+  color: #999;
+}
+
+.review-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.review-card__menu {
+  position: relative;
+}
+
+.review-card__menu-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.review-card__menu-button:hover {
+  background: #F5F5F5;
+  color: #333;
+}
+
+.review-card__menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 150px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.review-card__menu-item {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+  transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-card__menu-item:hover {
+  background: #F5F5F5;
+}
+
+.review-card__menu-item--danger {
+  color: #E53E3E;
+}
+
+.review-card__menu-item--danger:hover {
+  background: #FEF2F2;
+}
+
+.review-card__menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.review-card__content {
+  color: #444;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.review-card__content p {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .review-card {
+    padding: 1rem;
+  }
+
+  .review-card__header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .review-card__actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .review-card__author-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}
